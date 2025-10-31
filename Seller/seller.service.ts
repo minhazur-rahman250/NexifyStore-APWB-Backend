@@ -6,3 +6,5 @@ export class SellerService {
     return 'Hello World!';
   }
 }
+
+console.log(`Hello Mehedi`);
