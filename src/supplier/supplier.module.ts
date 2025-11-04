@@ -1,10 +1,11 @@
+// src/supplier/supplier.module.ts
 import { Module } from '@nestjs/common';
 import { SupplierController } from './supplier.controller';
 import { SupplierService } from './supplier.service';
 
 @Module({
-  imports: [],
   controllers: [SupplierController],
   providers: [SupplierService],
+  exports: [SupplierService],
 })
 export class SupplierModule {}
