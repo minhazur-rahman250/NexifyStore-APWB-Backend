@@ -5,7 +5,44 @@ import { SupplierDto } from './supplier.dto';
 @Injectable()
 export class SupplierService {
   // in-memory storage (simple array)
-  private suppliers: Array<any> = [];
+  private suppliers: Array<any> = [
+    {
+        id: 1,
+        name: 'Rahim Traders',
+        email: 'rahim@example.com',
+        phone: '01711111111',
+        address: 'Dhaka, Bangladesh'
+    },
+    {
+        id: 2,
+        name: 'Karim Enterprises',
+        email: 'karim@example.com',
+        phone: '01722222222',
+        address: 'Chittagong, Bangladesh'
+    },
+    {
+        id: 3,
+        name: 'ABC Supplies',
+        email: 'abc@example.com',
+        phone: '01733333333',
+        address: 'Khulna, Bangladesh'
+    },
+    {
+        id: 4,
+        name: 'XYZ Distributors',
+        email: 'xyz@example.com',
+        phone: '01744444444',
+        address: 'Sylhet, Bangladesh'
+    },
+    {
+        id: 5,
+        name: 'Global Traders',
+        email: 'global@example.com',
+        phone: '01755555555',
+        address: 'Rajshahi, Bangladesh'
+    }
+];
+
 
   // 1) Create supplier (POST)
   create(createSupplierDto: SupplierDto) {
@@ -34,6 +71,16 @@ export class SupplierService {
     );
     return { message: 'Suppliers filtered by name', data: result };
   }
+// 4) Search by email using query (GET /supplier/search/byemail?emai=...)
+  findByEmail(email: string) {
+    if (!email) return { message: 'No email provided', data: [] };
+    const result = this.suppliers.filter(s =>
+      s.email && s.email.toLowerCase().includes(email.toLowerCase())
+    );
+    return { message: 'Suppliers filtered by email', data: result };
+  }
+
+
 
   // 5) Full update (PUT)
   update(id: number, updateSupplierDto: Partial<SupplierDto>) {

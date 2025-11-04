@@ -31,6 +31,13 @@ export class SupplierController {
     return this.supplierService.findByName(name);
   }
 
+
+  // 4) GET /supplier/search/byemail?email=@example.com
+  @Get('search/byemail')
+  findByemail(@Query('email') email: string) {
+    return this.supplierService.findByEmail(email);
+  }
+
   // 5) PUT /supplier/:id
   @Put(':id')
   update(@Param('id') id: string, @Body() updateSupplierDto: Partial<SupplierDto>) {
