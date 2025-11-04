@@ -1,9 +1,6 @@
 export interface Buyer {
-id: string;
+id: number;
 name: string;
 email: string;
-address?: string;
-isActive?: boolean;
-createdAt: string;
-updatedAt?: string;
+address?: string; 
 }
