@@ -25,12 +25,7 @@ export class SupplierController {
     return this.supplierService.findOne(Number(id));
   }
 
-  // 4) GET /supplier/search/byname?name=abc
-  @Get('search/byname')
-  findByName(@Query('name') name: string) {
-    return this.supplierService.findByName(name);
-  }
-
+  
 
   // 4) GET /supplier/search/byemail?email=@example.com
   @Get('search/byemail')
