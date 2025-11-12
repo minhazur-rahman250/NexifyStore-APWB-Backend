@@ -22,7 +22,7 @@ import { SellerService } from './seller.service';
 import { ProductDto } from './seller.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { ValidateDatePipe } from '../pipes/validation.pipes';
+import { ValidateDatePipe } from './pipes/validation.pipe';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('seller')
