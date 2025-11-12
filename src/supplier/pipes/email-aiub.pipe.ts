@@ -2,7 +2,7 @@
 import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
 
 @Injectable()
-export class EmailAiubPipe implements PipeTransform {
+export class EmailAiubPipe  {
   transform(value: any) {
     if (!value || typeof value !== 'string') {
       throw new BadRequestException('Email is required');

@@ -2,7 +2,7 @@
 import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
 
 @Injectable()
-export class GenderValidationPipe implements PipeTransform {
+export class GenderValidationPipe {
   private readonly allowedGenders = ['male', 'female'];
 
   transform(value: any) {

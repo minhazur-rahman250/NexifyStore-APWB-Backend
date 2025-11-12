@@ -2,7 +2,7 @@
 import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
 
 @Injectable()
-export class PasswordUppercasePipe implements PipeTransform {
+export class PasswordUppercasePipe  {
   transform(value: any) {
     if (!value || typeof value !== 'string') {
       throw new BadRequestException('Password is required');

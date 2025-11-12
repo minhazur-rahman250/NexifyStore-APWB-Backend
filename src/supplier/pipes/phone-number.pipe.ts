@@ -2,7 +2,7 @@
 import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
 
 @Injectable()
-export class PhoneNumberPipe implements PipeTransform {
+export class PhoneNumberPipe  {
   transform(value: any) {
     if (!value) {
       throw new BadRequestException('Phone number is required');
