@@ -2,6 +2,6 @@
 export class SupplierDto {
   name: string;
   email: string;
-  contactNumber: string;
+  phoneNumber: string;
   address: string;
 }
