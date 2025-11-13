@@ -7,7 +7,7 @@ export class SupplierService {
   private suppliers: Array<any> = [
     {
       id: 1,
-      name: 'Rahim Traders',
+      name: 'Mehedi Traders',
       email: 'rahim@aiub.edu',
       password: 'Secure123',
       gender: 'male',
