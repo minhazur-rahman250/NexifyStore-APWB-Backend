@@ -1,84 +1,103 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, Like } from 'typeorm';
+import { AdminEntity } from './admin.entity';
 import { AdminDto } from './admin.dto';
 
 @Injectable()
 export class AdminService {
-  private admins: AdminDto[] = [
-    { id: 1, name: 'Minhaz Rahman', email: 'minhaz1@gmail.com', password: 'pass123', phone: '01700000000' },
-    { id: 2, name: 'Arif Khan', email: 'arifkhan@gmail.com', password: 'pass234', phone: '01700000001' },
-    { id: 3, name: 'Rafiul Islam', email: 'rafiul@gmail.com', password: 'pass345', phone: '01700000002' },
-    { id: 4, name: 'Sadia Jahan', email: 'sadia@gmail.com', password: 'pass456', phone: '01700000003' },
-    { id: 5, name: 'Tanmoy Hasan', email: 'tanmoy@gmail.com', password: 'pass567', phone: '01700000004' },
-    { id: 6, name: 'Nusrat Alam', email: 'nusrat@gmail.com', password: 'pass678', phone: '01700000005' },
-    { id: 7, name: 'Ruhul Amin', email: 'ruhul@gmail.com', password: 'pass789', phone: '01700000006' },
-    { id: 8, name: 'Tahsin Rahman', email: 'tahsin@gmail.com', password: 'pass890', phone: '01700000007' },
-    { id: 9, name: 'Farhana Akter', email: 'farhana@gmail.com', password: 'pass901', phone: '01700000008' },
-    { id: 10, name: 'Hasan Mahmud', email: 'hasan@gmail.com', password: 'pass012', phone: '01700000009' },
-    {
-      id: 11,
-      name: 'Minhaz Rahman mahi',
-      email: 'minhaz@minhazmahi',
-      password: 'pass1234567',
-      phone: '01711112222'
-    }
-  ];
+  constructor(
+    @InjectRepository(AdminEntity)
+    private readonly adminRepo: Repository<AdminEntity>,
+  ) {}
 
-  create(adminDto: AdminDto) {
-    const admin = { ...adminDto, id: this.admins.length + 1 };
+  async create(adminDto: AdminDto) {
+    const admin = this.adminRepo.create({
+      ...adminDto,
+      fileName: adminDto.file ? adminDto.file.originalname : null,
+    });
 
-    this.admins.push(admin);
+    await this.adminRepo.save(admin);
 
     return {
       message: 'Admin created successfully',
-      name: admin.name,
-      email: admin.email,
-      phone: admin.phone,
-      file: admin.file ? admin.file.originalname : 'No file uploaded'
+      "name": admin.name,
+      "email": admin.email, 
+      "phone": admin.phone,
+      "fileName": admin.fileName,
     };
   }
 
-  postEmail(payload: object) {
-    return {
-      message: 'Email received successfully!',
-      data: payload,
-    };
+  async findAll() {
+    return this.adminRepo.find();
   }
 
-  findAll() {
-    return this.admins;
+  async findByEmail(email: string) {
+    return this.adminRepo.find({
+      where: { email: Like(`%${email}%`) },
+    });
   }
 
-  findByEmail(email: string) {
-    return this.admins.filter(a => a.email.includes(email));
+  async findOne(id: number) {
+    const admin = await this.adminRepo.findOne({ where: { id } });
+    if (!admin) throw new NotFoundException('Admin not found');
+    return admin;
   }
 
-  findOne(id: number) {
-    return this.admins.find(admin => admin.id === id) || { message: 'Admin not found' };
-  }
-
-  update(id: number, adminDto: AdminDto) {
-    const admin = this.admins.find(a => a.id === id);
-    if (!admin) return { message: 'Admin not found' };
+  async update(id: number, adminDto: AdminDto) {
+    const admin = await this.findOne(id);
     Object.assign(admin, adminDto);
-    return { message: 'Admin updated successfully', admin };
+    await this.adminRepo.save(admin);
+
+    return {
+      message: 'Admin updated successfully',
+      "name": admin.name,
+      "email": admin.email, 
+      "phone": admin.phone,
+      "fileName": admin.fileName,
+    };
   }
 
-  patchEmail(id: number, email: string) {
-    const admin = this.admins.find(a => a.id === id);
-    if (!admin) return { message: 'Admin not found' };
+  async patchEmail(id: number, email: string) {
+    const admin = await this.findOne(id);
     admin.email = email;
-    return { message: 'Email updated successfully', admin };
+    await this.adminRepo.save(admin);
+
+    return {
+      message: 'Email updated successfully',
+      "name": admin.name,
+      "email": admin.email, 
+      "phone": admin.phone,
+      "fileName": admin.fileName,
+    };
   }
 
-  remove(id: number) {
-    const index = this.admins.findIndex(a => a.id === id);
-    if (index === -1) return { message: 'Admin not found' };
-    const deleted = this.admins.splice(index, 1)[0];
-    return { message: 'Admin deleted successfully', deleted };
+  async remove(id: number) {
+    const admin = await this.findOne(id);
+    await this.adminRepo.remove(admin);
+
+    return { message: 'Admin removed successfully', admin };
   }
 
-  deleteAll() {
-    this.admins = [];
+  async deleteAll() {
+    await this.adminRepo.clear();
     return { message: 'All admins deleted successfully' };
   }
+
+  async findByFullName(substring: string) {
+    return this.adminRepo.find({ where: { fullName: Like(`%${substring}%`) } });
+  }
+
+  async findByUsername(username: string) {
+    const user = await this.adminRepo.findOne({ where: { username } });
+    if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
+
+  async removeByUsername(username: string) {
+    const user = await this.findByUsername(username);
+    await this.adminRepo.remove(user);
+    return { message: 'User removed', user };
+  }
+
 }

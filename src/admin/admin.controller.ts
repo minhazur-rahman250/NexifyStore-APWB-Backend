@@ -1,13 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UploadedFile, UseInterceptors, UsePipes, ValidationPipe, BadRequestException } from '@nestjs/common';
+import {Body,Controller,Delete,Get,Param,Patch,Post,Put,Query,
+UploadedFile,UseInterceptors,ValidationPipe,UsePipes,BadRequestException,} from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { AdminDto } from './admin.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller()
 export class AdminController {
-  admins: any;
   constructor(private readonly adminService: AdminService) {}
-#catagory3
 
   @Post('admin/create')
   @UseInterceptors(FileInterceptor('file'))
@@ -16,14 +15,9 @@ export class AdminController {
     if (file && file.mimetype !== 'application/pdf') {
       throw new BadRequestException('Only PDF accepted.');
     }
-    console.log('Uploaded file:', file);
+
     adminDto.file = file;
     return this.adminService.create(adminDto);
-  }
-
-  @Post('admin/create/:id')
-  createEmail(@Param('id') id: object, @Query('email') email: object) {
-    return this.adminService.postEmail({ id, email });
   }
 
   @Get('admin/all')
@@ -31,14 +25,14 @@ export class AdminController {
     return this.adminService.findAll();
   }
 
-  @Get('admin/:id')
-  findOne(@Param('id') id: string) {
-    return this.adminService.findOne(+id);
-  }
-
   @Get('admin')
   findByEmail(@Query('email') email: string) {
     return this.adminService.findByEmail(email);
+  }
+
+  @Get('admin/:id')
+  findOne(@Param('id') id: string) {
+    return this.adminService.findOne(+id);
   }
 
   @Put('admin/update/:id')
@@ -60,14 +54,20 @@ export class AdminController {
   deleteAll() {
     return this.adminService.deleteAll();
   }
+
+
+  @Get('search')
+  findByFullName(@Query('q') substring: string) {
+    return this.adminService.findByFullName(substring);
+  }
+
+  @Get(':username')
+  findByUsername(@Param('username') username: string) {
+    return this.adminService.findByUsername(username);
+  }
+
+  @Delete(':username')
+  removeByUsername(@Param('username') username: string) {
+    return this.adminService.removeByUsername(username);
+  }
 }
-
-
-
-
-
-
-
-
-
-
