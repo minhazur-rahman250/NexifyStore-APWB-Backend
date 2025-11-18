@@ -1,17 +1,26 @@
-import { Entity, Column, PrimaryGeneratedColumn} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, BeforeInsert } from 'typeorm';
  
 @Entity("buyer")
 export class BuyerEntity{
  @PrimaryGeneratedColumn()
  id: number;
- @Column()
+
+ @Column({default: "true"})
+ isActive: boolean;
+
+ @Column({name: "fullName", type: "varchar" , length: "50"})
  name: string;
- @Column()
- email: string;
- @Column()
- address: string;
- @Column()
+ 
+ @Column({type: "bigint" })
  phone: string;
- @Column()
- nidNumber: string;
+ 
+//  @Column()
+//  @Generated("uuid")
+//  uuid: string;
+
+ @BeforeInsert()
+ generatedId() {
+    this.id = Math.floor(Math.random() * 1000);
+ }
+  
  }

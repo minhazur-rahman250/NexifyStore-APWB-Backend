@@ -53,8 +53,8 @@ export class BuyerController {
    //Create Buyer
   @Post()
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true})) 
-  create(@Body() buyer: BuyerDto) {
-    return this.buyerService.create(buyer);
+  createBuyer(@Body() buyer: BuyerDto) {
+    return this.buyerService.createBuyer(buyer);
   }
   
   // Create buyer and upload NID image (multipart/form-data)
@@ -117,7 +117,7 @@ export class BuyerController {
 
     // you can store file info with buyer, e.g. store path in buyer object
     // but since DTO has no file field, we can send separate response:
-    const created = this.buyerService.create(buyer);
+    const created = this.buyerService.createBuyer(buyer);
     
     //console.log('Buyer Created:', created);
     //console.log('==============================\n');
@@ -148,7 +148,7 @@ getImage(@Param('name') name: string, @Res() res: express.Response) {
   @Put(':id')
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: BuyerDto) {
-    return this.buyerService.update(id, dto);
+    return this.buyerService.updateBuyer(id, dto);
   }  
 
    
@@ -158,7 +158,7 @@ getImage(@Param('name') name: string, @Res() res: express.Response) {
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   patch(@Param('id', ParseIntPipe) id: number, @Body() dto: Partial<BuyerDto>) {
     // reusing update logic (service merges)
-    return this.buyerService.update(id, dto as BuyerDto);
+    return this.buyerService.updateBuyer(id, dto as BuyerDto);
   } 
    
 
