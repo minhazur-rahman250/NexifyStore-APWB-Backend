@@ -1,13 +1,11 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-//import { SellerModule } from './Seller/seller.module';
-import { UsersModule } from './users/users.module'; 
 import { BuyerModule } from './buyer/buyer.module'; 
 import { TypeOrmModule } from '@nestjs/typeorm'; 
 
 @Module(
-    { imports: [ UsersModule, BuyerModule, TypeOrmModule.forRoot( 
+    { imports: [ BuyerModule, TypeOrmModule.forRoot( 
         { type: 'postgres', 
           host: 'localhost', 
           port: 5432, 

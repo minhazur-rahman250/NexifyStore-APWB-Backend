@@ -1,64 +1,52 @@
-import { Controller, Get, Post, Put, Patch, Delete, Param, Res, Body, Query, UsePipes, ValidationPipe, UseInterceptors, UploadedFile, BadRequestException,
-  ParseIntPipe, } from '@nestjs/common';
+import {
+  Controller,Get,Post,Put,Patch,Delete,Param,Res,Body,Query,UsePipes,ValidationPipe,UseInterceptors,UploadedFile,BadRequestException,ParseIntPipe,
+} from '@nestjs/common';
 import { BuyerService } from './buyer.service';
 import { BuyerDto } from './buyer.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { MulterError } from 'multer';
-//import { Res } from '@nestjs/common';
 import express from 'express';
 import { join } from 'path';
-
-
 
 @Controller('buyer')
 export class BuyerController {
   constructor(private buyerService: BuyerService) {}
 
-
-   
-
-  //Get All Buyers
+  // GET /buyer/ -> all buyers
   @Get()
   findAll() {
     return this.buyerService.findAll();
   }
 
-  //Get Buyer by ID
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.buyerService.findOne(id);
-  }
+  // Search routes must come before param routes to avoid ':id' swallowing them
+  // GET /buyer/search/by-email?email=...
+  // @Get('search/by-email')
+  // searchByEmail(@Query('email') email: string) {
+  //   return this.buyerService.searchByEmail(email);
+  // }
 
-   // GET /buyer/email?email=someone@example.xyz
-  @Get('search/by-email')
-  searchByEmail(@Query('email') email: string) {
-    console.log('Email received:', email);
-    return this.buyerService.searchByEmail(email);
-  }
- 
-  //Search Buyer by Name (Query)
+  // GET /buyer/search/by-name?name=...
   @Get('search/by-name')
-  search(@Query('name') name: string) {
+  searchByName(@Query('name') name: string) {
     return this.buyerService.searchByName(name);
   }
 
-  //Get Buyer Count
+  // GET /buyer/stats/count
   @Get('stats/count')
   count() {
     return this.buyerService.count();
   }
-  
-   //Create Buyer
+
+  // POST /buyer -> create buyer (JSON)
   @Post()
-  @UsePipes(new ValidationPipe({ whitelist: true, transform: true})) 
+  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   createBuyer(@Body() buyer: BuyerDto) {
     return this.buyerService.createBuyer(buyer);
   }
-  
-  // Create buyer and upload NID image (multipart/form-data)
-  // Field names expected: name, email, address, phone, nidNumber, nidImage (file)
+
+  // Register with NID image (multipart)
   @Post('register-with-nid')
   @UseInterceptors(
     FileInterceptor('nidImage', {
@@ -66,114 +54,83 @@ export class BuyerController {
         destination: './uploads',
         filename: (_req, file, cb) => {
           const uniqueName = `${Date.now()}${extname(file.originalname)}`;
-          console.log('[MULTER] Saving file as:', uniqueName);
           cb(null, uniqueName);
         },
       }),
       fileFilter: (_req, file, cb) => {
-         //console.log('[MULTER] Checking file type:', file.originalname);
-        // allow common image types for NID image (jpg|jpeg|png|webp)
-        if (file.originalname.match(/\.(jpg|jpeg|png|webp)$/i)) {
+        // allow jpeg/png/webp
+        if (file.mimetype.match(/^image\/(jpeg|png|webp)$/)) {
           cb(null, true);
         } else {
-          console.error('[MULTER] Invalid file type:', file.originalname);
           cb(new MulterError('LIMIT_UNEXPECTED_FILE', 'nidImage'), false);
         }
       },
       limits: {
-        // 2 MB
-        fileSize: 2 * 1024 * 1024,
+        fileSize: 2 * 1024 * 1024, // 2 MB
       },
     }),
   )
-   
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
-  registerWithNid(@Body() body: BuyerDto, @UploadedFile() file: Express.Multer.File) {
-    
-  // console.log('\n==============================');
-  // console.log('[BUYER REGISTER WITH NID]');
-  // console.log('Request Body:', body);
-    
-    // file may be undefined if not sent
+  async registerWithNid(@Body() body: BuyerDto, @UploadedFile() file?: Express.Multer.File) {
     if (!file) {
-      //console.error('[ERROR] File not uploaded or invalid format.');
       throw new BadRequestException('NID image is required and must be JPG/PNG/WebP and <= 2MB');
     }
 
-    // console.log('Uploaded File Info:');
-    // console.log({
-    //   filename: file.filename,
-    //   mimetype: file.mimetype,
-    //   size: file.size,
-    //   path: `./uploads/${file.filename}`,
-    // });
-
-    // optionally attach filename / path to buyer DTO
-    const buyer: BuyerDto = {
+    // attach file info to saved buyer if you have a column for it, else just return
+    const created = await this.buyerService.createBuyer({
       ...body,
-      nidNumber: body.nidNumber,
-      // keep phone/address/name/email from body; id assigned in service
-    };
+      // note: BuyerEntity currently only stores name and phone; expand entity to store email/address/nidNumber/fileName
+      phone: body.phone,
+      name: body.name,
+    });
 
-    // you can store file info with buyer, e.g. store path in buyer object
-    // but since DTO has no file field, we can send separate response:
-    const created = this.buyerService.createBuyer(buyer);
-    
-    //console.log('Buyer Created:', created);
-    //console.log('==============================\n');
     return {
       message: 'Buyer registered with NID image',
-      buyer: created.buyer || created,
+      buyer: created,
       file: { filename: file.filename, size: file.size, path: `./uploads/${file.filename}` },
     };
   }
 
-   
-// Fetch NID image by filename
-@Get('getimage/:name')
-getImage(@Param('name') name: string, @Res() res: express.Response) {
-  // Build full path to the uploads folder
-  const imagePath = join(process.cwd(), 'uploads/', name);
+  // Serve uploaded images
+  @Get('getimage/:name')
+  getImage(@Param('name') name: string, @Res() res: express.Response) {
+    const imagePath = join(process.cwd(), 'uploads', name);
+    return res.sendFile(imagePath, (err) => {
+      if (err) {
+        res.status(404).json({ message: 'Image not found' });
+      }
+    });
+  }
 
-  // Send the file
-  return res.sendFile(imagePath, (err) => {
-    if (err) {
-      console.error('File not found at:', imagePath);
-      res.status(404).json({ message: 'Image not found' });
-    }
-  });
-}  
+  // GET /buyer/:id
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.buyerService.findOne(id);
+  }
 
- // Update Buyer (PUT)
+  // PUT /buyer/:id
   @Put(':id')
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: BuyerDto) {
-    return this.buyerService.updateBuyer(id, dto);
-  }  
+    return this.buyerService.updateBuyer(id, dto as any);
+  }
 
-   
-
-  // Partially Update Buyer (PATCH)
+  // PATCH /buyer/:id
   @Patch(':id')
   @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
   patch(@Param('id', ParseIntPipe) id: number, @Body() dto: Partial<BuyerDto>) {
-    // reusing update logic (service merges)
-    return this.buyerService.updateBuyer(id, dto as BuyerDto);
-  } 
-   
+    return this.buyerService.updateBuyer(id, dto as any);
+  }
 
-  //Delete Buyer
+  // DELETE /buyer/:id
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.buyerService.remove(id);
   }
 
-
-  //  Reset All Buyers
+  // DELETE /buyer -> clear all
   @Delete()
   clear() {
     return this.buyerService.clear();
   }
 }
-
-

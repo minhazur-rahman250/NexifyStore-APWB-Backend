@@ -1,26 +1,25 @@
-import { Entity, Column, PrimaryGeneratedColumn, BeforeInsert } from 'typeorm';
- 
-@Entity("buyer")
-export class BuyerEntity{
- @PrimaryGeneratedColumn()
- id: number;
+import { Entity, Column, PrimaryColumn, BeforeInsert } from 'typeorm';
 
- @Column({default: "true"})
- isActive: boolean;
+@Entity('buyer')
+export class BuyerEntity {
+  @PrimaryColumn()
+  id: number;
 
- @Column({name: "fullName", type: "varchar" , length: "50"})
- name: string;
- 
- @Column({type: "bigint" })
- phone: string;
- 
-//  @Column()
-//  @Generated("uuid")
-//  uuid: string;
+  @Column({ default: true })
+  isActive: boolean;
 
- @BeforeInsert()
- generatedId() {
-    this.id = Math.floor(Math.random() * 1000);
- }
-  
- }
+  // fullName is nullable per lab spec (User Category 2)
+  @Column({ name: 'fullName', type: 'varchar', length: 150, nullable: true })
+  name: string | null;
+
+  // store phone as string in DB to avoid JS number issues with bigints,
+  // but the lab asked for bigint: if you want true bigint, set type: 'bigint'
+  @Column({ type: 'bigint', unsigned: true })
+  phone: string;
+
+  @BeforeInsert()
+  generateId() {
+    // custom id generation as requested by lab
+    this.id = Math.floor(Math.random() * 900000 + 100000); // 6-digit-ish id
+  }
+}
