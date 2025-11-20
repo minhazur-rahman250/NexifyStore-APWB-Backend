@@ -31,7 +31,7 @@ export class BuyerDto {
   @IsString()
   address: string;
 
-  @IsNotEmpty()
+  //@IsNotEmpty()
   @IsString()
   phone: string;
 

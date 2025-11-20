@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { BuyerEntity } from './buyer.entity';
 import { BuyerDto } from './buyer.dto';
 
@@ -11,18 +11,21 @@ export class BuyerService {
     private readonly buyerRepository: Repository<BuyerEntity>,
   ) {}
 
-  // Create buyer
-  async createBuyer(dto: Partial<BuyerDto & { phone?: any }>): Promise<BuyerEntity> {
-    // Create entity instance
-    const buyer = this.buyerRepository.create({
-      name: dto.name ?? null,
-      phone: dto.phone,
-      isActive: true,
-      // other fields you might want to store (address, email, nidNumber) are not in the entity;
-      // you can expand entity columns if you need to persist those
-    });
-    return this.buyerRepository.save(buyer);
-  }
+    // Create buyer
+    async createBuyer(dto: Partial<BuyerDto & {phone : any}>): Promise<BuyerEntity> {
+      // Create entity instance
+      const buyer = this.buyerRepository.create({
+        name: dto.name ?? null,
+        email: dto.email,
+        address: dto.address,
+        phone: dto.phone,
+        nidNumber: dto.nidNumber,
+        isActive: true,
+        // other fields you might want to store (address, email, nidNumber) are not in the entity;
+        // you can expand entity columns if you need to persist those
+      });
+      return this.buyerRepository.save(buyer);
+    }
 
   // Get all buyers
   async findAll(): Promise<BuyerEntity[]> {
@@ -30,7 +33,7 @@ export class BuyerService {
   }
 
   // Find one by id (throws if not found)
-  async findOne(id: number): Promise<BuyerEntity> {
+  async findOne(id: number ): Promise<BuyerEntity> {
     const buyer = await this.buyerRepository.findOne({ where: { id } });
     if (!buyer) throw new NotFoundException('Buyer not found');
     return buyer;
@@ -45,16 +48,34 @@ export class BuyerService {
   }
 
   // Remove buyer
-  async remove(id: number): Promise<{ message: string; id: number }> {
-    const buyer = await this.findOne(id);
+  async remove(id: number): Promise<BuyerEntity> {
+    const buyer = await this.buyerRepository.findOne({where: {id}});
+    
+    if(!buyer){
+      throw new NotFoundException('Buyer not found');
+    }
+    
     await this.buyerRepository.remove(buyer);
-    return { message: 'Buyer removed', id };
+    
+    return { message: 'Buyer removed', id } as any;
   }
 
+   
+
+  async removeByPhone(phone: string): Promise<BuyerEntity> {
+     
+    const buyer = await this.buyerRepository.findOne({where: {phone}});
+    if(!buyer){
+      throw new NotFoundException('Buyer not found');
+    }
+
+    await this.buyerRepository.remove(buyer);
+    return {phone} as any;
+  }
   // Clear all buyers
-  async clear(): Promise<{ message: string }> {
+  async clear(): Promise<void> {
     await this.buyerRepository.clear();
-    return { message: 'All buyers cleared' };
+    return { message: 'All buyers cleared' } as any;
   }
 
   // Search helpers (these assume other fields persisted; adjust if not)
@@ -65,7 +86,13 @@ export class BuyerService {
     });
   }
 
-   
+  async searchByEmail(email: string) {
+    // if email not stored in entity, implement in DB schema first
+    return this.buyerRepository.find({
+      where: { /* email: email */ },
+    });
+  }
+
   async count(): Promise<number> {
     return this.buyerRepository.count();
   }

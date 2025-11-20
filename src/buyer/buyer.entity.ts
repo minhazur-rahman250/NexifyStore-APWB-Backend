@@ -12,11 +12,22 @@ export class BuyerEntity {
   @Column({ name: 'fullName', type: 'varchar', length: 150, nullable: true })
   name: string | null;
 
+  @Column()
+  email: string
+
+  @Column()
+  address : string
   // store phone as string in DB to avoid JS number issues with bigints,
   // but the lab asked for bigint: if you want true bigint, set type: 'bigint'
-  @Column({ type: 'bigint', unsigned: true })
-  phone: string;
+  // @Column({ type: 'bigint', unsigned: true, nullable: true })
+  // phone: string | null;
+   
 
+  @Column({ type: 'bigint' ,nullable: true })
+  phone: string | null ; 
+  
+  @Column()
+  nidNumber: string;
   @BeforeInsert()
   generateId() {
     // custom id generation as requested by lab
