@@ -1,21 +1,4 @@
-  import {
-    Controller,
-    Get,
-    Post,
-    Put,
-    Patch,
-    Delete,
-    Param,
-    Res,
-    Body,
-    Query,
-    UsePipes,
-    ValidationPipe,
-    UseInterceptors,
-    UploadedFile,
-    BadRequestException,
-    ParseIntPipe,
-  } from '@nestjs/common';
+  import { Controller, Get, Post, Put, Patch, Delete, Param, Res, Body, Query, UsePipes, ValidationPipe, UseInterceptors, UploadedFile, BadRequestException, ParseIntPipe, } from '@nestjs/common';
   import { BuyerService } from './buyer.service';
   import { BuyerDto } from './buyer.dto';
   import { FileInterceptor } from '@nestjs/platform-express';
