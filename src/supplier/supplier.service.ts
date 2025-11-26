@@ -1,13 +1,21 @@
 // src/supplier/supplier.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { SupplierDto } from './supplier.dto';
+import { Category4Supplier } from './supplier.entity'; // ✅ সঠিক path
 
 @Injectable()
 export class SupplierService {
+  constructor(
+    @InjectRepository(Category4Supplier) 
+    private category4Repo: Repository<Category4Supplier>,
+  ) {}
+
   private suppliers: Array<any> = [
     {
       id: 1,
-      name: 'Mehedi Traders',
+      name: 'Rahim Traders',
       email: 'rahim@aiub.edu',
       password: 'Secure123',
       gender: 'male',
@@ -21,28 +29,19 @@ export class SupplierService {
       name: 'Karim Enterprises',
       email: 'karim@aiub.edu',
       password: 'StrongPass1',
-      gender: 'male', 
+      gender: 'male',
       contactNumber: '01722222222',
       address: 'Chittagong, Bangladesh',
       profileImage: null,
       category: 'category2'
-    },
-    {
-      id: 3,
-      name: 'ABC Supplies',
-      email: 'abc@example.com',
-      contactNumber: '01733333333',
-      address: 'Khulna, Bangladesh',
-      category: 'original'
     }
   ];
 
-  // ==================== ORIGINAL SUPPLIER METHODS ====================
+  // ORIGINAL SUPPLIER METHODS 
 
-  // 1) Create supplier (POST) - Original
   create(createSupplierDto: SupplierDto) {
-    const newSupplier = { 
-      id: Date.now(), 
+    const newSupplier = {
+      id: Date.now(),
       ...createSupplierDto,
       category: 'original'
     };
@@ -50,21 +49,44 @@ export class SupplierService {
     return { message: 'Supplier created successfully', data: newSupplier };
   }
 
-  // 2) Get all suppliers (GET)
   findAll() {
     return { message: 'All suppliers fetched', data: this.suppliers };
   }
 
-  // 3) Get single supplier by id (GET)
   findOne(id: number) {
     const supplier = this.suppliers.find(s => s.id === id);
-    if (!supplier) {
-      throw new NotFoundException('Supplier not found');
-    }
+    if (!supplier) throw new NotFoundException('Supplier not found');
     return { message: 'Supplier found', data: supplier };
   }
 
-  // 4) Search by email using query
+  update(id: number, updateSupplierDto: Partial<SupplierDto>) {
+    const index = this.suppliers.findIndex(s => s.id === id);
+    if (index === -1) throw new NotFoundException('Supplier not found');
+
+    this.suppliers[index] = { ...this.suppliers[index], ...updateSupplierDto };
+    return { message: 'Supplier updated successfully', data: this.suppliers[index] };
+  }
+
+  patch(id: number, partialData: Partial<SupplierDto>) {
+    const supplier = this.suppliers.find(s => s.id === id);
+    if (!supplier) throw new NotFoundException('Supplier not found');
+
+    Object.assign(supplier, partialData);
+    return { message: 'Supplier partially updated', data: supplier };
+  }
+
+  delete(id: number) {
+    const index = this.suppliers.findIndex(s => s.id === id);
+    if (index === -1) throw new NotFoundException('Supplier not found');
+
+    const [removed] = this.suppliers.splice(index, 1);
+    return { message: 'Supplier deleted successfully', data: removed };
+  }
+
+  countAll() {
+    return { message: 'Total suppliers', count: this.suppliers.length };
+  }
+
   findByEmail(email: string) {
     if (!email) return { message: 'No email provided', data: [] };
     const result = this.suppliers.filter(s =>
@@ -73,186 +95,156 @@ export class SupplierService {
     return { message: 'Suppliers filtered by email', data: result };
   }
 
-  // 5) Full update (PUT) - Original
-  update(id: number, updateSupplierDto: Partial<SupplierDto>) {
-    const index = this.suppliers.findIndex(s => s.id === id);
-    if (index === -1) {
-      throw new NotFoundException('Supplier not found');
-    }
-    
-    this.suppliers[index] = { ...this.suppliers[index], ...updateSupplierDto };
-    return { message: 'Supplier updated successfully', data: this.suppliers[index] };
-  }
+  //  CATEGORY2 SUPPLIER METHODS 
 
-  // 6) Partial update (PATCH) - Original
-  patch(id: number, partialData: Partial<SupplierDto>) {
-    const supplier = this.suppliers.find(s => s.id === id);
-    if (!supplier) {
-      throw new NotFoundException('Supplier not found');
-    }
-    Object.assign(supplier, partialData);
-    return { message: 'Supplier partially updated', data: supplier };
-  }
-
-  // 7) Delete (DELETE) - Original
-  delete(id: number) {
-    const index = this.suppliers.findIndex(s => s.id === id);
-    if (index === -1) {
-      throw new NotFoundException('Supplier not found');
-    }
-    const [removed] = this.suppliers.splice(index, 1);
-    return { message: 'Supplier deleted successfully', data: removed };
-  }
-
-  // 8) Count (GET /supplier/count/all)
-  countAll() {
-    return { message: 'Total suppliers', count: this.suppliers.length };
-  }
-
-  // ==================== CATEGORY2 SUPPLIER METHODS ====================
-
-  // Create Category 2 Supplier
-  createCategory2(supplierData: any) {
+  createCategory2(supplierData: SupplierDto & { profileImage?: string }) {
     const newSupplier = {
       id: Date.now(),
       ...supplierData,
       category: 'category2'
     };
     this.suppliers.push(newSupplier);
-    return { 
-      message: 'Category 2 Supplier created successfully', 
-      data: newSupplier 
-    };
+    return { message: 'Category2 Supplier created successfully', data: newSupplier };
   }
 
-  // Get All Category2 Suppliers
   findAllCategory2() {
-    const category2Suppliers = this.suppliers.filter(s => s.category === 'category2');
-    return { 
-      message: 'All Category2 suppliers fetched', 
-      data: category2Suppliers,
-      count: category2Suppliers.length
-    };
+    const data = this.suppliers.filter(s => s.category === 'category2');
+    return { message: 'All Category2 suppliers fetched', data, count: data.length };
   }
 
-  // Get Category2 Supplier by ID
   findOneCategory2(id: number) {
     const supplier = this.suppliers.find(s => s.id === id && s.category === 'category2');
-    if (!supplier) {
-      throw new NotFoundException('Category2 supplier not found');
-    }
-    return { 
-      message: 'Category2 supplier found', 
-      data: supplier 
-    };
+    if (!supplier) throw new NotFoundException('Category2 supplier not found');
+    return { message: 'Category2 supplier found', data: supplier };
   }
 
-  // Update Category2 Supplier (PUT - Full Update)
-  updateCategory2(id: number, updateData: any) {
+  updateCategory2(id: number, updateData: Partial<SupplierDto>) {
     const index = this.suppliers.findIndex(s => s.id === id && s.category === 'category2');
-    if (index === -1) {
-      throw new NotFoundException('Category2 supplier not found');
-    }
-    
+    if (index === -1) throw new NotFoundException('Category2 supplier not found');
+
     this.suppliers[index] = { ...this.suppliers[index], ...updateData };
-    return { 
-      message: 'Category2 supplier updated successfully', 
-      data: this.suppliers[index] 
-    };
+    return { message: 'Category2 supplier updated successfully', data: this.suppliers[index] };
   }
 
-  // Partial Update Category2 Supplier (PATCH - Partial Update)
-  patchCategory2(id: number, partialData: any) {
+  patchCategory2(id: number, partialData: Partial<SupplierDto>) {
     const supplier = this.suppliers.find(s => s.id === id && s.category === 'category2');
-    if (!supplier) {
-      throw new NotFoundException('Category2 supplier not found');
-    }
-    
+    if (!supplier) throw new NotFoundException('Category2 supplier not found');
+
     Object.assign(supplier, partialData);
-    return { 
-      message: 'Category2 supplier partially updated', 
-      data: supplier 
-    };
+    return { message: 'Category2 supplier partially updated', data: supplier };
   }
 
-  // Delete Category2 Supplier
   deleteCategory2(id: number) {
     const index = this.suppliers.findIndex(s => s.id === id && s.category === 'category2');
-    if (index === -1) {
-      throw new NotFoundException('Category2 supplier not found');
-    }
-    
+    if (index === -1) throw new NotFoundException('Category2 supplier not found');
+
     const [deleted] = this.suppliers.splice(index, 1);
-    return { 
-      message: 'Category2 supplier deleted successfully', 
-      data: deleted 
-    };
+    return { message: 'Category2 supplier deleted successfully', data: deleted };
   }
 
-  // Count All Category2 Suppliers
   countAllCategory2() {
-    const category2Suppliers = this.suppliers.filter(s => s.category === 'category2');
-    return { 
-      message: 'Total Category2 suppliers', 
-      count: category2Suppliers.length 
-    };
+    const data = this.suppliers.filter(s => s.category === 'category2');
+    return { message: 'Total Category2 suppliers', count: data.length };
   }
 
-  // Search Category2 by Email
   findCategory2ByEmail(email: string) {
     if (!email) return { message: 'No email provided', data: [] };
-    const result = this.suppliers.filter(s => 
-      s.category === 'category2' && 
-      s.email && 
-      s.email.toLowerCase().includes(email.toLowerCase())
+    const result = this.suppliers.filter(
+      s => s.category === 'category2' && s.email?.toLowerCase().includes(email.toLowerCase())
     );
     return { message: 'Category2 suppliers filtered by email', data: result };
   }
 
-  // Search Category2 by Name
   findCategory2ByName(name: string) {
     if (!name) return { message: 'No name provided', data: [] };
-    const result = this.suppliers.filter(s => 
-      s.category === 'category2' && 
-      s.name && 
-      s.name.toLowerCase().includes(name.toLowerCase())
+    const result = this.suppliers.filter(
+      s => s.category === 'category2' && s.name?.toLowerCase().includes(name.toLowerCase())
     );
     return { message: 'Category2 suppliers filtered by name', data: result };
   }
 
-  // ==================== UTILITY METHODS ====================
-
-  // Find supplier by any field
-  findByField(field: string, value: string) {
-    const result = this.suppliers.filter(s => 
-      s[field] && s[field].toString().toLowerCase().includes(value.toLowerCase())
-    );
+  //  CATEGORY 4 SUPPLIER METHODS (TypeORM Database) 
+  
+  async createCategory4(data: any) {
+    const user = this.category4Repo.create({
+      country: data.country || 'Unknown'
+      
+    });
+    
+    const savedUser = await this.category4Repo.save(user);
     return { 
-      message: `Suppliers filtered by ${field}`, 
+      message: 'Category4 user created successfully', 
+      data: savedUser 
+    };
+  }
+
+  
+  async updateCountry(id: number, country: string) {
+    const user = await this.category4Repo.findOne({ where: { id } });
+    
+    if (!user) throw new NotFoundException('Category4 user not found');
+
+    user.country = country;
+    const updatedUser = await this.category4Repo.save(user);
+    
+    return { 
+      message: 'Country updated successfully', 
+      data: updatedUser 
+    };
+  }
+
+ 
+  async getUsersByJoiningDate(date: string) {
+    const result = await this.category4Repo
+      .createQueryBuilder('user')
+      .where('DATE(user.joiningDate) = :date', { date })
+      .getMany();
+
+    return { 
+      message: `Users with joining date ${date}`, 
       data: result 
     };
   }
 
-  // Get suppliers by category
-  findByCategory(category: string) {
-    const result = this.suppliers.filter(s => s.category === category);
+ 
+  async getUsersWithDefaultCountry() {
+    const result = await this.category4Repo.find({
+      where: { country: 'Unknown' }
+    });
+
     return { 
-      message: `Suppliers filtered by category: ${category}`, 
-      data: result,
-      count: result.length
+      message: 'Users with default country (Unknown)', 
+      data: result 
     };
   }
 
-  // Update profile image only
-  updateProfileImage(id: number, profileImage: string) {
-    const supplier = this.suppliers.find(s => s.id === id);
-    if (!supplier) {
-      throw new NotFoundException('Supplier not found');
-    }
-    supplier.profileImage = profileImage;
+ 
+  async getAllCategory4() {
+    const result = await this.category4Repo.find();
     return { 
-      message: 'Profile image updated successfully', 
-      data: supplier 
+      message: 'All Category4 users fetched', 
+      data: result 
+    };
+  }
+
+  
+  async getCategory4ById(id: number) {
+    const user = await this.category4Repo.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('Category4 user not found');
+    return { 
+      message: 'Category4 user found', 
+      data: user 
+    };
+  }
+
+ 
+  async deleteCategory4(id: number) {
+    const result = await this.category4Repo.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException('Category4 user not found');
+    }
+    return { 
+      message: 'Category4 user deleted successfully' 
     };
   }
 }
