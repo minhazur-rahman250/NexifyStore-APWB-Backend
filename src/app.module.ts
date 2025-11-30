@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { BuyerModule } from './buyer/buyer.module';
 //import { SellerModule } from './seller/seller.module';
 //import { SupplierModule } from './supplier/supplier.module';
-import { AuthModule } from './auth/auth.module';
+//import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -18,7 +18,7 @@ import { AuthModule } from './auth/auth.module';
       synchronize: true,
     }),
     
-    AuthModule,
+    //AuthModule,
     BuyerModule,
     //SellerModule,
     //SupplierModule,

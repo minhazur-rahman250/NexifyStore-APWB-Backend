@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryColumn, BeforeInsert } from 'typeorm';
+import { Entity, Column, PrimaryColumn, BeforeInsert,  } from 'typeorm';
+ 
 
 @Entity('buyer')
 export class BuyerEntity {
@@ -39,4 +40,6 @@ export class BuyerEntity {
     // Generate 6-digit random ID
     this.id = Math.floor(Math.random() * 900000 + 100000);
   }
+
+   
 }
