@@ -1,3 +1,4 @@
+//buyer.entity.ts
 import { Entity, Column, PrimaryColumn, BeforeInsert } from 'typeorm';
 
 @Entity('buyer')
