@@ -1,18 +1,11 @@
-//buyer.dto.ts
-import {
-  IsEmail,
-  IsOptional,
-  IsString,
-  Matches,
-  IsNotEmpty,
-  MinLength,
-} from 'class-validator';
+import { IsEmail, IsOptional, IsString, Matches, IsNotEmpty, MinLength, } from 'class-validator';
+
 
 export class BuyerDto {
   @IsOptional()
   id?: number;
 
-  // name (fullName) is nullable in entity, but when provided validate chars
+  // ========== NAME VALIDATION ==========
   @IsOptional()
   @IsString()
   @Matches(/^[A-Za-z\s]+$/, {
@@ -20,7 +13,7 @@ export class BuyerDto {
   })
   name?: string;
 
-  // Email required (your earlier code required .xyz domain); keep that behavior
+  // ========== EMAIL VALIDATION (.xyz domain required) ==========
   @IsNotEmpty()
   @IsEmail({}, { message: 'Invalid email format' })
   @Matches(/^[\w.+-]+@[\w-]+\.(xyz)$/, {
@@ -28,15 +21,16 @@ export class BuyerDto {
   })
   email: string;
 
+  // ========== ADDRESS VALIDATION ==========
   @IsNotEmpty()
   @IsString()
   address: string;
 
-  //@IsNotEmpty()
+  // ========== PHONE VALIDATION ==========
   @IsString()
   phone: string;
 
-  // NID required for register-with-nid route
+  // ========== NID NUMBER VALIDATION ==========
   @IsOptional()
   @IsString()
   @Matches(/^\d{10,17}$/, {

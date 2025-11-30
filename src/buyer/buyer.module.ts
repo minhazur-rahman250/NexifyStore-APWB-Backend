@@ -1,13 +1,13 @@
-//buyer.module.ts
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { BuyerController } from './buyer.controller';
 import { BuyerService } from './buyer.service';
-import { BuyerEntity } from "./buyer.entity";
-import { TypeOrmModule } from "@nestjs/typeorm";
+import { BuyerEntity } from './buyer.entity';
 
 @Module({
-  imports: [ TypeOrmModule.forFeature([BuyerEntity]),],
+  imports: [TypeOrmModule.forFeature([BuyerEntity])],
   controllers: [BuyerController],
-  providers: [BuyerService]
+  providers: [BuyerService],
+  exports: [BuyerService],
 })
 export class BuyerModule {}
