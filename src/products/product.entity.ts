@@ -14,6 +14,7 @@ import { ReviewEntity } from './review.entity';
 import { OrderItemEntity } from '../orders/order-item.entity';
 import { CartItemEntity } from '../cart/cart-item.entity';
 import { SupplierStockEntity } from '../supplier/supplier-stock.entity';
+import { NotificationEntity } from '../notifications/notification.entity';
 
 @Entity('products')
 export class ProductEntity {
@@ -32,6 +33,9 @@ export class ProductEntity {
   @ManyToOne(() => CategoryEntity, (cat) => cat.products, { nullable: true })
   @JoinColumn({ name: 'category_id' })
   category: CategoryEntity;
+
+  @OneToMany(() => NotificationEntity, (n) => n.product)
+  notifications: NotificationEntity[];
 
   // Seller owner
   @ManyToOne(() => UserEntity, (u) => u.products)
@@ -53,4 +57,5 @@ export class ProductEntity {
   @ManyToMany(() => UserEntity, (u) => u.suppliedProducts)
   suppliers: UserEntity[];
   Category4Suppliers: any;
+   //notifications: any;
 }
