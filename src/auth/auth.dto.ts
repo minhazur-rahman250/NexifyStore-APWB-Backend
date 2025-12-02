@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength, Matches } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength, Matches, IsIn } from 'class-validator';
 
 export class RegisterDto {
   @IsString()
@@ -27,6 +27,11 @@ export class RegisterDto {
   @IsString()
   @IsNotEmpty()
   address: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @IsIn(['admin', 'buyer', 'seller', 'supplier'])
+  role: string;
 }
 
 export class LoginDto {
@@ -41,6 +46,7 @@ export class LoginDto {
 
 export class JwtPayload {
   email: string;
-  id: number;
+  id: string;   // or number, match your UserEntity.id type
   role: string;
 }
+

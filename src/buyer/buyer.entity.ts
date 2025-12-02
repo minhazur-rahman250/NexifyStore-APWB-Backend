@@ -39,4 +39,7 @@ export class BuyerEntity {
     // Generate 6-digit random ID
     this.id = Math.floor(Math.random() * 900000 + 100000);
   }
+
+
+  
 }

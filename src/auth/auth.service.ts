@@ -8,7 +8,6 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
 import { UserEntity } from './user.entity';
 import { RegisterDto, LoginDto } from './auth.dto';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -22,9 +21,9 @@ export class AuthService {
     private mailerService: MailerService,
   ) {}
 
-  // ========== REGISTER (BCrypt Password Hashing) ==========
+  // ========== REGISTER ==========
   async register(registerDto: RegisterDto) {
-    const { email, password, fullName, phone, address } = registerDto;
+    const { email, password, fullName, phone, address, role } = registerDto;
 
     // Check if email already exists
     const existingUser = await this.userRepo.findOne({ where: { email } });
@@ -40,27 +39,33 @@ export class AuthService {
         password,
         phone,
         address,
-        role: 'buyer', // Default role
+        role: role as 'admin' | 'seller' | 'buyer' | 'supplier',
         status: 'active',
       });
 
       const savedUser = await this.userRepo.save(user);
 
       // ========== MAILER (Bonus - Send Welcome Email) ==========
-      await this.mailerService.sendMail({
-        to: email,
-        subject: 'Welcome to NexifyStore!',
-        text: `Hello ${fullName},\n\nWelcome to NexifyStore! Your account has been successfully created.\n\nBest regards,\nNexifyStore Team`,
-        html: `
-          <h2>Welcome to NexifyStore!</h2>
-          <p>Hello ${fullName},</p>
-          <p>Your account has been successfully created.</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Role:</strong> Buyer</p>
-          <p>Thank you for joining us!</p>
-          <p>Best regards,<br/>NexifyStore Team</p>
-        `,
-      });
+      // Make this "best effort": if mail fails, do NOT break registration
+      try {
+        await this.mailerService.sendMail({
+          to: email,
+          subject: 'Welcome to NexifyStore!',
+          text: `Hello ${fullName},\n\nWelcome to NexifyStore! Your account has been successfully created.\n\nBest regards,\nNexifyStore Team`,
+          html: `
+            <h2>Welcome to NexifyStore!</h2>
+            <p>Hello ${fullName},</p>
+            <p>Your account has been successfully created.</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Role:</strong> ${role}</p>
+            <p>Thank you for joining us!</p>
+            <p>Best regards,<br/>NexifyStore Team</p>
+          `,
+        });
+      } catch (mailError) {
+        // Log error in real app; here we just ignore mail failure
+        console.error('Failed to send welcome email:', mailError?.message);
+      }
 
       return {
         message: 'User registered successfully',
@@ -98,7 +103,7 @@ export class AuthService {
       throw new UnauthorizedException('User account is inactive');
     }
 
-    // Compare password using BCrypt
+    // Compare password using entity method (uses bcrypt internally)
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password');

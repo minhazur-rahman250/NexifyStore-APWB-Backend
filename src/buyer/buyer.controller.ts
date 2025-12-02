@@ -19,9 +19,12 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+
 import { MulterError } from 'multer';
 import express from 'express';
+
 import { join } from 'path';
+// import type { File as MulterFile } from 'multer';
 import { BuyerService } from './buyer.service';
 import { BuyerDto } from './buyer.dto';
 
@@ -92,11 +95,12 @@ export class BuyerController {
       },
     }),
   )
-  @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
+  
   async registerWithNid(
     @Body() body: BuyerDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {
+   {
     if (!file) {
       throw new BadRequestException(
         'NID image is required and must be JPG/PNG/WebP and <= 2MB',
@@ -124,6 +128,7 @@ export class BuyerController {
       throw error;
     }
   }
+}
 
   // ========== SERVE UPLOADED IMAGE ==========
   // GET /buyer/getimage/:name

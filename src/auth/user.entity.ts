@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, BeforeInsert } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, BeforeInsert, OneToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { Category4Supplier } from '../supplier/supplier.entity';
 
 @Entity('users')
 export class UserEntity {
@@ -49,4 +50,8 @@ export class UserEntity {
   async comparePassword(plainPassword: string): Promise<boolean> {
     return await bcrypt.compare(plainPassword, this.password);
   }
+
+  @OneToMany(() => Category4Supplier, (supplier: Category4Supplier) => supplier.approvedBy)
+  approvedSuppliers: Category4Supplier[];
+  
 }

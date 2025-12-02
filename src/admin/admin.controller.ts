@@ -21,10 +21,10 @@ import {
   GetLogsQueryDto,
 } from './admin.dto';
 import { JwtAuthGuard } from '../auth/jwt.guard';
-import { RoleGuard } from '../auth/role.guard';
+// import { RoleGuard } from '../auth/role.guard';
 
 @Controller('admin')
-@UseGuards(JwtAuthGuard) // All admin routes require JWT
+@UseGuards(JwtAuthGuard)
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
