@@ -1,15 +1,14 @@
-// src/supplier/pipes/all-validation.pipe.ts
 import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
 
 @Injectable()
 export class AllValidationPipe implements PipeTransform {
   transform(body: any) {
-   
+    // Allow empty body for some requests
     if (!body || Object.keys(body).length === 0) {
-      return body; 
+      return body;
     }
 
-    
+    // ========== EMAIL VALIDATION (AIUB Domain Required) ==========
     if (!body.email) {
       throw new BadRequestException('Email is required');
     }
@@ -17,7 +16,7 @@ export class AllValidationPipe implements PipeTransform {
       throw new BadRequestException('Email must contain aiub.edu domain');
     }
 
-    
+    // ========== PASSWORD VALIDATION ==========
     if (!body.password) {
       throw new BadRequestException('Password is required');
     }
@@ -31,7 +30,7 @@ export class AllValidationPipe implements PipeTransform {
       throw new BadRequestException('Password must contain at least one uppercase letter');
     }
 
-    
+    // ========== GENDER VALIDATION ==========
     if (body.gender) {
       if (!['male', 'female'].includes(body.gender.toLowerCase())) {
         throw new BadRequestException('Gender must be either male or female');
@@ -39,7 +38,7 @@ export class AllValidationPipe implements PipeTransform {
       body.gender = body.gender.toLowerCase();
     }
 
-
+    // ========== CONTACT NUMBER VALIDATION ==========
     if (body.contactNumber && !/^[0-9]+$/.test(body.contactNumber.toString())) {
       throw new BadRequestException('Phone number must contain only numbers');
     }

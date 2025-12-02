@@ -1,4 +1,3 @@
-// src/supplier/supplier.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SupplierController } from './supplier.controller';
@@ -7,14 +6,9 @@ import { AllValidationPipe } from './pipes/all-validation.pipe';
 import { Category4Supplier } from './supplier.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Category4Supplier])
-  ],
+  imports: [TypeOrmModule.forFeature([Category4Supplier])],
   controllers: [SupplierController],
-  providers: [
-    SupplierService,
-    AllValidationPipe 
-  ],
+  providers: [SupplierService, AllValidationPipe],
   exports: [SupplierService],
 })
 export class SupplierModule {}

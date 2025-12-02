@@ -1,18 +1,17 @@
-// src/supplier/entities/category4-supplier.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, Generated, CreateDateColumn } from 'typeorm';
 
-@Entity('supplier')
+@Entity('supplier_category4')
 export class Category4Supplier {
-  @PrimaryGeneratedColumn() 
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  @Generated('uuid') 
+  @Generated('uuid')
   uniqueId: string;
 
-  @CreateDateColumn({ type: 'timestamp' }) 
+  @CreateDateColumn({ type: 'timestamp' })
   joiningDate: Date;
 
-  @Column({ type: 'varchar', length: 30, default: 'Unknown' }) 
+  @Column({ type: 'varchar', length: 30, default: 'Unknown' })
   country: string;
 }

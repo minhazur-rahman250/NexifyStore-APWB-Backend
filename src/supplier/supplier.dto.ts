@@ -1,4 +1,3 @@
-// src/supplier/supplier.dto.ts
 import {
   IsEmail,
   IsNotEmpty,
@@ -16,9 +15,7 @@ export enum Gender {
   FEMALE = 'female',
 }
 
-/* 
-   BASE SUPPLIER DTO  (COMMON FOR ALL CATEGORIES)
-*/
+// ========== BASE SUPPLIER DTO (Common for All Categories) ==========
 export class SupplierDto {
   @IsNotEmpty()
   @IsString()
@@ -56,9 +53,7 @@ export class SupplierDto {
   category?: string;
 }
 
-/* 
-   CATEGORY 2 DTO (AIUB Email, Strict Validation)
-*/
+// ========== CATEGORY 2 DTO (AIUB Email, Strict Validation) ==========
 export class Category2SupplierDto extends SupplierDto {
   @Matches(/@aiub\.edu$/, {
     message: 'Email must contain aiub.edu domain',
@@ -82,17 +77,13 @@ export class Category2SupplierDto extends SupplierDto {
   declare contactNumber: string;
 }
 
-/* 
-   CATEGORY 4 DTO (Task Requirements অনুযায়ী)
-*/
+// ========== CATEGORY 4 DTO (TypeORM) ==========
 export class Category4SupplierDto {
-  
   @IsOptional()
   @IsString()
   @MaxLength(30)
   country?: string;
 
-  
   @IsOptional()
   @IsDateString()
   joiningDate?: string;
