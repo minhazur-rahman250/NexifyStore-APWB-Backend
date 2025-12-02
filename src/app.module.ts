@@ -7,6 +7,10 @@ import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
 import { OrderModule } from './orders/order.module';
 import { TransactionModule } from './transactions/transaction.module';
+import { CategoryModule } from './products/category.module';
+import { ReviewModule } from './products/review.module';
+import { CartModule } from './cart/cart.module';
+import { NotificationModule } from './notifications/notification.module';
 
 
 @Module({
@@ -21,7 +25,11 @@ import { TransactionModule } from './transactions/transaction.module';
       autoLoadEntities: true,
       synchronize: true,
     }),
-    
+
+    NotificationModule,
+    CartModule,
+    ReviewModule,
+    CategoryModule,  
     OrderModule,
     TransactionModule,
     AuthModule,

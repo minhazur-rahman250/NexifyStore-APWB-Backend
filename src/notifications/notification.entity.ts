@@ -7,6 +7,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { UserEntity } from '../auth/user.entity';
+import { ProductEntity } from '../products/product.entity';
 
 @Entity('notifications')
 export class NotificationEntity {
@@ -16,6 +17,10 @@ export class NotificationEntity {
   @ManyToOne(() => UserEntity, (u) => u.notifications)
   @JoinColumn({ name: 'user_id' })
   user: UserEntity;
+
+  @ManyToOne(() => ProductEntity, (p: ProductEntity) => p.notifications, { nullable: true })
+  @JoinColumn({ name: 'product_id' })
+  product: ProductEntity;
 
   @Column()
   title: string;
