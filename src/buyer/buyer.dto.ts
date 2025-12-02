@@ -1,4 +1,4 @@
-import { IsEmail, IsOptional, IsString, Matches, IsNotEmpty, MinLength, } from 'class-validator';
+ import { IsEmail, IsOptional, IsString, Matches, IsNotEmpty, MinLength, } from 'class-validator';
 
 
 export class BuyerDto {
