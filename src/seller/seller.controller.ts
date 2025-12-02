@@ -1,82 +1,110 @@
-// src/seller/seller.controller.ts
-import { Controller, Get, Post, Put, Patch, Delete, Param, Body, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Put,
+  Delete,
+  Param,
+  Body,
+  UsePipes,
+  ValidationPipe,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { SellerService } from './seller.service';
-import { ProductDto } from './seller.dto';
-import { SellerCategory4Dto } from './dtos/seller-category4.dto';
-import { DateValidationPipe } from './pipes/date-validation.pipe';
-import { UrlValidationPipe } from './pipes/url-validation.pipe';
+import { ProductDto, CreateUserDto, UpdateStatusDto } from './seller.dto';
+import { UserValidationPipe } from './pipes/validation.pipe';
 
 @Controller('seller')
 export class SellerController {
   constructor(private readonly sellerService: SellerService) {}
 
-  // existing product endpoints (same as before)
+  // ========== PRODUCT ROUTES (7+ CRUD Operations) ==========
+
+  // POST /seller - Create Product
   @Post()
-  create(@Body() createProductDto: ProductDto) {
-    return this.sellerService.create(createProductDto);
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  create(@Body() dto: ProductDto) {
+    return this.sellerService.create(dto);
   }
 
+  // GET /seller - Get All Products
   @Get()
   findAll() {
     return this.sellerService.findAll();
   }
 
-    @Get('users')
-getSellerUsers() {
-  return this.sellerService.getSellerUsers();
-}
-
+  // GET /seller/:id - Get Product by ID
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.sellerService.findOne(id);
   }
 
-  @Get('search/byname')
-  findByName(@Query('name') name: string) {
-    return this.sellerService.findByName(name);
-  }
-
-  @Get('search/bycategory')
-  findByCategory(@Query('category') category: string) {
-    return this.sellerService.findByCategory(category);
-  }
-
-  @Put(':id')
-  update(@Param('id') id: string, @Body() updateProductDto: ProductDto) {
-    return this.sellerService.update(id, updateProductDto);
-  }
-
+  // PATCH /seller/:id - Patch Product
   @Patch(':id')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   patch(@Param('id') id: string, @Body() partialData: Partial<ProductDto>) {
     return this.sellerService.patch(id, partialData);
   }
 
+  // PUT /seller/:id - Update Product
+  @Put(':id')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  update(@Param('id') id: string, @Body() updateDto: ProductDto) {
+    return this.sellerService.update(id, updateDto);
+  }
+
+  // DELETE /seller/:id - Delete Product
   @Delete(':id')
   delete(@Param('id') id: string) {
     return this.sellerService.delete(id);
   }
 
-  @Get('count/all')
+  // GET /seller/search/byname - Search Products by Name
+  @Get('search/byname')
+  findByName(@Body('name') name: string) {
+    return this.sellerService.findByName(name);
+  }
+
+  // GET /seller/search/bycategory - Search Products by Category
+  @Get('search/bycategory')
+  findByCategory(@Body('category') category: string) {
+    return this.sellerService.findByCategory(category);
+  }
+
+  // GET /seller/stats/count - Get Product Count
+  @Get('stats/count')
   countAll() {
     return this.sellerService.countAll();
   }
 
+  // ========== USER ROUTES (TypeORM + Pipes) ==========
 
+  // POST /seller/user - Create User
+  @Post('user')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  createUser(@Body(new UserValidationPipe()) dto: CreateUserDto) {
+    return this.sellerService.createUser(dto);
+  }
 
-
-  // ---------------------
-  // NEW: User Category 4 endpoint for Seller
-  // POST /seller/category4
-  @Post('category4')
-  @HttpCode(HttpStatus.CREATED)
-  createSellerCategory4(
-    @Body() body: SellerCategory4Dto,
-    @Body('dateOfBirth', new DateValidationPipe()) validatedDate: string,
-    @Body('socialLink', new UrlValidationPipe()) validatedUrl: string,
+  // PATCH /seller/user/:id/status - Update User Status
+  @Patch('user/:id/status')
+  updateUserStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: UpdateStatusDto,
   ) {
-    // body already validated by DTO (class-validator) for name & password presence & pattern
-    // the two pipes above validate date and URL specifically
-    // call service to create
-    return this.sellerService.createCategory4({ ...body, dateOfBirth: validatedDate, socialLink: validatedUrl });
+    return this.sellerService.updateUserStatus(id, body.status);
+  }
+
+  // GET /seller/user/inactive - Get Inactive Users
+  @Get('user/inactive')
+  getInactiveUsers() {
+    return this.sellerService.getInactiveUsers();
+  }
+
+  // GET /seller/user/older - Get Users Older Than 40
+  @Get('user/older')
+  getUsersOlderThan40() {
+    return this.sellerService.getUsersOlderThan40();
   }
 }
