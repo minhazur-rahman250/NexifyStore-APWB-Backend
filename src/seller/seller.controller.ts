@@ -3,111 +3,109 @@ import {
   Controller,
   Get,
   Post,
-  Put,
   Patch,
+  Put,
   Delete,
   Param,
   Body,
-  Query,
   UsePipes,
   ValidationPipe,
-  UseInterceptors,
-  UploadedFile,
-  ParseFilePipe,
-  FileTypeValidator,
-  MaxFileSizeValidator,
-  BadRequestException,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { SellerService } from './seller.service';
-import { ProductDto } from './seller.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { ValidateDatePipe } from './pipes/validation.pipe';
-import { AnyFilesInterceptor } from '@nestjs/platform-express';
+import { ProductDto, CreateUserDto, UpdateStatusDto } from './seller.dto';
+import { UserValidationPipe } from './pipes/validation.pipe';
 
 @Controller('seller')
 export class SellerController {
   constructor(private readonly sellerService: SellerService) {}
 
-  // 1) POST /seller
-  // Use ValidationPipe (transform:true -> convert number strings to numbers)
+  // ========== PRODUCT ROUTES (7+ CRUD Operations) ==========
+
+  // POST /seller - Create Product
   @Post()
-  @UseInterceptors(AnyFilesInterceptor())
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  // If you want to accept an image as form-data (key: 'image'), uncomment the interceptor block below
-  // @UseInterceptors(FileInterceptor('image', {
-  //   storage: diskStorage({
-  //     destination: './uploads',
-  //     filename: (req, file, cb) => cb(null, Date.now() + '_' + file.originalname),
-  //   }),
-  //   fileFilter: (req, file, cb) => {
-  //     if (!file.mimetype.match(/^image\/(jpg|jpeg|png|webp)$/)) {
-  //       return cb(new BadRequestException('Only image files are allowed'), false);
-  //     }
-  //     cb(null, true);
-  //   },
-  //   limits: { fileSize: 2000000 }, // 2MB
-  // }))
-  create(@Body() createProductDto: ProductDto /*, @UploadedFile() file: Express.Multer.File */) {
-    // If you use image, attach file info to dto or handle separately
-    return this.sellerService.create(createProductDto);
+  create(@Body() dto: ProductDto) {
+    return this.sellerService.create(dto);
   }
 
-  // 2) GET /seller
+  // GET /seller - Get All Products
   @Get()
   findAll() {
     return this.sellerService.findAll();
   }
 
-  // 3) GET /seller/:id
+  // GET /seller/:id - Get Product by ID
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.sellerService.findOne(id);
   }
 
-  // 4) GET /seller/search/byname?name=abc
-  @Get('search/byname')
-  findByName(@Query('name') name: string) {
-    return this.sellerService.findByName(name);
-  }
-
-  // 5) GET /seller/search/bycategory?category=electronics
-  @Get('search/bycategory')
-  findByCategory(@Query('category') category: string) {
-    return this.sellerService.findByCategory(category);
-  }
-
-  // 6) PUT /seller/:id
-  @Put(':id')
-  @UseInterceptors(AnyFilesInterceptor())
-  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  update(
-    @Param('id') id: string,
-    @Body('addedDate', new ValidateDatePipe()) addedDate: Date, // example of using custom pipe for a date field
-    @Body() updateProductDto: ProductDto,
-  ) {
-    // if you used addedDate separately, convert or set into updateProductDto
-    if (addedDate) {
-      (updateProductDto as any).addedDate = addedDate.toISOString();
-    }
-    return this.sellerService.update(id, updateProductDto);
-  }
-
-  // 7) PATCH /seller/:id
+  // PATCH /seller/:id - Patch Product
   @Patch(':id')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   patch(@Param('id') id: string, @Body() partialData: Partial<ProductDto>) {
     return this.sellerService.patch(id, partialData);
   }
 
-  // 8) DELETE /seller/:id
+  // PUT /seller/:id - Update Product
+  @Put(':id')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  update(@Param('id') id: string, @Body() updateDto: ProductDto) {
+    return this.sellerService.update(id, updateDto);
+  }
+
+  // DELETE /seller/:id - Delete Product
   @Delete(':id')
   delete(@Param('id') id: string) {
     return this.sellerService.delete(id);
   }
 
-  // 9) GET /seller/count/all
-  @Get('count/all')
+  // GET /seller/search/byname - Search Products by Name
+  @Get('search/byname')
+  findByName(@Body('name') name: string) {
+    return this.sellerService.findByName(name);
+  }
+
+  // GET /seller/search/bycategory - Search Products by Category
+  @Get('search/bycategory')
+  findByCategory(@Body('category') category: string) {
+    return this.sellerService.findByCategory(category);
+  }
+
+  // GET /seller/stats/count - Get Product Count
+  @Get('stats/count')
   countAll() {
     return this.sellerService.countAll();
+  }
+
+  // ========== USER ROUTES (TypeORM + Pipes) ==========
+
+  // POST /seller/user - Create User
+  @Post('user')
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  createUser(@Body(new UserValidationPipe()) dto: CreateUserDto) {
+    return this.sellerService.createUser(dto);
+  }
+
+  // PATCH /seller/user/:id/status - Update User Status
+  @Patch('user/:id/status')
+  updateUserStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: UpdateStatusDto,
+  ) {
+    return this.sellerService.updateUserStatus(id, body.status);
+  }
+
+  // GET /seller/user/inactive - Get Inactive Users
+  @Get('user/inactive')
+  getInactiveUsers() {
+    return this.sellerService.getInactiveUsers();
+  }
+
+  // GET /seller/user/older - Get Users Older Than 40
+  @Get('user/older')
+  getUsersOlderThan40() {
+    return this.sellerService.getUsersOlderThan40();
   }
 }

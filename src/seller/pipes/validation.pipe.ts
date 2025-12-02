@@ -1,18 +1,31 @@
 // src/pipes/validation.pipes.ts
-import { PipeTransform, Injectable, BadRequestException, ArgumentMetadata } from '@nestjs/common';
+import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
 
 @Injectable()
-export class ValidateDatePipe implements PipeTransform<string, Date> {
-  transform(value: string, metadata: ArgumentMetadata): Date {
+export class UserValidationPipe implements PipeTransform {
+  transform(value: any) {
     if (!value) {
-      throw new BadRequestException(`${metadata.data || 'date'} is required`);
+      throw new BadRequestException('Body is required');
     }
 
-    // Try parse ISO date or common formats
-    const d = new Date(value);
-    if (isNaN(d.getTime())) {
-      throw new BadRequestException(`${metadata.data || 'date'} is not a valid date`);
+    const { fullName, age } = value;
+
+    if (!fullName || typeof fullName !== 'string' || fullName.trim().length === 0) {
+      throw new BadRequestException('fullName is required and must be a non-empty string');
     }
-    return d;
+    if (fullName.length > 100) {
+      throw new BadRequestException('fullName must be at most 100 characters');
+    }
+
+    if (age === undefined || age === null) {
+      throw new BadRequestException('age is required');
+    }
+
+    const numericAge = typeof age === 'string' ? parseInt(age, 10) : age;
+    if (!Number.isInteger(numericAge) || numericAge < 1) {
+      throw new BadRequestException('age must be a positive integer');
+    }
+
+    return { ...value, fullName: fullName.trim(), age: numericAge };
   }
 }

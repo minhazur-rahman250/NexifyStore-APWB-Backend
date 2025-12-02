@@ -1,25 +1,18 @@
-// // src/seller/seller.dto.ts
-// export class ProductDto {
-//   name: string;
-//   price: number;
-//   stock: number;
-//   category: string;
-//   description: string;
-// }
-
-// // src/seller/seller.dto.ts
-// export class ProductDto {
-//   name: string;
-//   price: number;
-//   stock: number;
-//   category: string;
-//   description: string;
-// }
-
-
 // src/seller/seller.dto.ts
-import { IsString, IsNotEmpty, IsNumberString, IsOptional, Matches, IsUrl, IsDateString } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsNumberString,
+  IsOptional,
+  Matches,
+  IsUrl,
+  IsDateString,
+  IsInt,
+  Min,
+  IsIn,
+} from 'class-validator';
 
+// ========== PRODUCT DTO ==========
 export class ProductDto {
   @IsString()
   @IsNotEmpty()
@@ -59,4 +52,21 @@ export class ProductDto {
   })
   @IsOptional()
   password?: string;
+}
+
+// ========== USER DTO ==========
+export class CreateUserDto {
+  @IsString()
+  @IsNotEmpty()
+  fullName: string;
+
+  @IsInt()
+  @Min(1)
+  age: number;
+}
+
+export class UpdateStatusDto {
+  @IsString()
+  @IsIn(['active', 'inactive'])
+  status: 'active' | 'inactive';
 }
