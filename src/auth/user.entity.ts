@@ -8,6 +8,8 @@ import { CartEntity } from 'src/cart/cart.entity';
 import { OrderEntity } from 'src/orders/order.entity';
 import { SupplierStockEntity } from 'src/supplier/supplier-stock.entity';
 import { NotificationEntity } from 'src/notifications/notification.entity';
+  
+
 
 @Entity('users')
 export class UserEntity {

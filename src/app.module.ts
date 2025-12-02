@@ -6,6 +6,7 @@ import { SupplierModule } from './supplier/supplier.module';
 import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
 import { OrderModule } from './orders/order.module';
+import { TransactionModule } from './transactions/transaction.module';
 
 
 @Module({
@@ -20,7 +21,9 @@ import { OrderModule } from './orders/order.module';
       autoLoadEntities: true,
       synchronize: true,
     }),
+    
     OrderModule,
+    TransactionModule,
     AuthModule,
     BuyerModule,
     SellerModule,
