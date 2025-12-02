@@ -13,7 +13,7 @@ import { AdminModule } from './admin/admin.module';
       host: 'localhost',
       port: 5432,
       username: 'postgres',
-      password: 'Admin', // Change this
+      password: 'Ayshu@12', // Change this
       database: 'NexifyStore', // Shared database
       autoLoadEntities: true,
       synchronize: true,

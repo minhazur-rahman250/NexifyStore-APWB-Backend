@@ -1,5 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, BeforeInsert } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, BeforeInsert, ManyToMany, JoinTable, OneToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { ProductEntity } from '../products/product.entity';
+// import { SupplierStockEntity } from 'src/supplier/supplier-stock.entity';
 
 @Entity('users')
 export class UserEntity {
@@ -37,6 +39,9 @@ export class UserEntity {
 
   @CreateDateColumn()
   createdAt: Date;
+    createdCategories: any;
+    products: any;
+    reviews: any;
 
   // ========== BCrypt Password Hashing ==========
   @BeforeInsert()
@@ -49,4 +54,25 @@ export class UserEntity {
   async comparePassword(plainPassword: string): Promise<boolean> {
     return await bcrypt.compare(plainPassword, this.password);
   }
+
+
+
+// ========== Supplier side relations ==========
+ 
+  // @OneToMany(() => SupplierStockEntity, (stock) => stock.supplier)
+  // supplierStocks: SupplierStockEntity[];
+
+
+
+  // ManyToMany (optional) -> UserEntity side
+
+ 
+// @ManyToMany(() => ProductEntity, (p) => p.suppliers)
+// @JoinTable({
+//   name: 'supplier_products',
+//   joinColumn: { name: 'supplier_id', referencedColumnName: 'id' },
+//   inverseJoinColumn: { name: 'product_id', referencedColumnName: 'id' },
+// })
+// suppliedProducts: ProductEntity[];
+
 }
