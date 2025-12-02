@@ -1,5 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, BeforeInsert } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, BeforeInsert, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { ProductEntity } from 'src/products/product.entity';
+import { TransactionEntity } from 'src/transactions/transaction.entity';
+import { AdminActionLogEntity } from 'src/admin/admin-action-log.entity';
+import { ReviewEntity } from 'src/products/review.entity';
+import { CartEntity } from 'src/cart/cart.entity';
+import { OrderEntity } from 'src/orders/order.entity';
+import { SupplierStockEntity } from 'src/supplier/supplier-stock.entity';
+import { NotificationEntity } from 'src/notifications/notification.entity';
 
 @Entity('users')
 export class UserEntity {
@@ -49,4 +57,52 @@ export class UserEntity {
   async comparePassword(plainPassword: string): Promise<boolean> {
     return await bcrypt.compare(plainPassword, this.password);
   }
+
+  // ========== Buyer side relations ==========
+
+  @OneToMany(() => OrderEntity, (order) => order.buyer)
+  ordersAsBuyer: OrderEntity[];
+
+  @OneToMany(() => CartEntity, (cart) => cart.buyer)
+  carts: CartEntity[];
+
+  @OneToMany(() => ReviewEntity, (review) => review.buyer)
+  reviews: ReviewEntity[];
+
+  @OneToMany(() => TransactionEntity, (t) => t.buyer)
+  buyerTransactions: TransactionEntity[];
+
+  // ========== Seller side relations ==========
+
+  @OneToMany(() => ProductEntity, (p) => p.seller)
+  products: ProductEntity[];
+
+  @OneToMany(() => TransactionEntity, (t) => t.seller)
+  sellerTransactions: TransactionEntity[];
+
+  // ========== Supplier side relations ==========
+
+  @OneToMany(() => SupplierStockEntity, (stock) => stock.supplier)
+  supplierStocks: SupplierStockEntity[];
+
+  @ManyToMany(() => ProductEntity, (p) => p.suppliers)
+  @JoinTable({
+    name: 'supplier_products',
+    joinColumn: { name: 'supplier_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'product_id', referencedColumnName: 'id' },
+  })
+  suppliedProducts: ProductEntity[];
+
+  // ========== Admin side relations ==========
+
+  @OneToMany(() => AdminActionLogEntity, (log) => log.admin)
+  adminLogs: AdminActionLogEntity[];
+
+  @OneToMany(() => AdminActionLogEntity, (log) => log.targetUser)
+  targetLogs: AdminActionLogEntity[];
+
+  @OneToMany(() => NotificationEntity, (n) => n.user)
+  notifications: NotificationEntity[];
 }
+
+
