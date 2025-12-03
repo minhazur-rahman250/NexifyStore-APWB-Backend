@@ -11,6 +11,6 @@ import { UserEntity } from '../auth/user.entity';
   ],
   controllers: [AdminController],
   providers: [AdminService],
-  exports: [AdminService],
+  
 })
 export class AdminModule {}

@@ -21,6 +21,8 @@ export class BuyerEntity {
   @Column({ type: 'varchar', length: 150 })
   email: string;
 
+  @Column({ type: 'varchar',nullable: true })
+  password: string;
   // ========== ADDRESS ==========
   @Column({ type: 'varchar', length: 255 })
   address: string;
@@ -39,4 +41,10 @@ export class BuyerEntity {
     // Generate 6-digit random ID
     this.id = Math.floor(Math.random() * 900000 + 100000);
   }
+
+  @Column({ type: 'varchar', default: 'buyer' })
+role: string;
+
+
+
 }

@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn, BeforeInsert, PrimaryColumn } from 'typeorm';
 import { UserEntity } from '../auth/user.entity';
+import { BuyerEntity } from 'src/buyer/buyer.entity';
 
 @Entity('admin_action_logs')
 export class AdminActionLogEntity {
@@ -22,7 +23,6 @@ export class AdminActionLogEntity {
   @JoinColumn({ name: 'targetUserId' })
   targetUser: UserEntity;
 
-  // ========== ACTION TYPE ==========
   @Column({
     type: 'enum',
     enum: ['Approve', 'Suspend', 'Reject', 'Warn', 'Delete', 'Ban'],
@@ -37,4 +37,16 @@ export class AdminActionLogEntity {
   // ========== CREATED AT ==========
   @CreateDateColumn()
   createdAt: Date;
+
+  
+
+
+
 }
+
+ 
+
+
+
+
+

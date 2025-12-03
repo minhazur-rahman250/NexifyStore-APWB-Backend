@@ -1,203 +1,167 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+// src/supplier/supplier.service.ts
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { SupplierDto } from './supplier.dto';
 import { Category4Supplier } from './supplier.entity';
+import { UserEntity } from 'src/auth/user.entity';
+import { ProductEntity } from 'src/products/product.entity';
 
 @Injectable()
 export class SupplierService {
   constructor(
     @InjectRepository(Category4Supplier)
-    private category4Repo: Repository<Category4Supplier>,
+    private readonly category4Repo: Repository<Category4Supplier>,
+
+    @InjectRepository(UserEntity)
+    private readonly userRepo: Repository<UserEntity>,
+
+    @InjectRepository(ProductEntity)
+    private readonly productRepo: Repository<ProductEntity>,
   ) {}
 
-  // ========== IN-MEMORY SUPPLIERS STORAGE ==========
-  private suppliers: Array<any> = [
-    {
-      id: 1,
-      name: 'Rahim Traders',
-      email: 'rahim@aiub.edu',
-      password: 'Secure123',
-      gender: 'male',
-      contactNumber: '01711111111',
-      address: 'Dhaka, Bangladesh',
-      profileImage: null,
-      category: 'original',
-    },
-    {
-      id: 2,
-      name: 'Karim Enterprises',
-      email: 'karim@aiub.edu',
-      password: 'StrongPass1',
-      gender: 'male',
-      contactNumber: '01722222222',
-      address: 'Chittagong, Bangladesh',
-      profileImage: null,
-      category: 'original',
-    },
-  ];
+  // ========== ORIGINAL SUPPLIER METHODS USING USERENTITY ==========
 
-  private supplierIdCounter = 3;
-  private category2IdCounter = 1;
+  async createCategory4FromUser(user: UserEntity) {
+    const supplier = this.category4Repo.create({
+      country: 'Unknown', // or user.country if you have it
+      // map any other fields from user to Category4Supplier if needed
+    });
 
-  // ========== ORIGINAL SUPPLIER METHODS ==========
+    return this.category4Repo.save(supplier);
+  }
+  
+  // POST /supplier
+  async create(createSupplierDto: SupplierDto) {
+    const supplierUser = this.userRepo.create({
+      fullName: createSupplierDto.name,
+      email: createSupplierDto.email,
+      password: createSupplierDto.password,
+      phone: createSupplierDto.contactNumber,
+      address: createSupplierDto.address,
+      role: 'supplier',
+      status: 'active',
+    });
 
-  create(createSupplierDto: SupplierDto) {
-    const newSupplier = {
-      id: this.supplierIdCounter++,
-      ...createSupplierDto,
-      category: 'original',
-    };
-    this.suppliers.push(newSupplier);
-    return { message: 'Supplier created successfully', data: newSupplier };
+    const saved = await this.userRepo.save(supplierUser);
+    return { message: 'Supplier created successfully', data: saved };
   }
 
-  findAll() {
-    return { message: 'All suppliers fetched', data: this.suppliers };
+  // GET /supplier
+  async findAll() {
+    const suppliers = await this.userRepo.find({
+      where: { role: 'supplier' },
+    });
+    return { message: 'All suppliers fetched', data: suppliers };
   }
 
-  findOne(id: number) {
-    const supplier = this.suppliers.find((s) => s.id === id);
+  // GET /supplier/:id
+  async findOne(id: string) {
+    const supplier = await this.userRepo.findOne({
+      where: { id, role: 'supplier' },
+    });
     if (!supplier) throw new NotFoundException('Supplier not found');
     return { message: 'Supplier found', data: supplier };
   }
 
-  findByEmail(email: string) {
+  // GET /supplier/search/byemail?email=...
+  async findByEmail(email: string) {
     if (!email) return { message: 'No email provided', data: [] };
-    const result = this.suppliers.filter(
-      (s) => s.email && s.email.toLowerCase().includes(email.toLowerCase()),
-    );
-    return { message: 'Suppliers filtered by email', data: result };
+    const suppliers = await this.userRepo.find({
+      where: { role: 'supplier', email },
+    });
+    return { message: 'Suppliers filtered by email', data: suppliers };
   }
 
-  update(id: number, updateSupplierDto: Partial<SupplierDto>) {
-    const index = this.suppliers.findIndex((s) => s.id === id);
-    if (index === -1) throw new NotFoundException('Supplier not found');
-
-    this.suppliers[index] = { ...this.suppliers[index], ...updateSupplierDto };
-    return {
-      message: 'Supplier updated successfully',
-      data: this.suppliers[index],
-    };
-  }
-
-  patch(id: number, partialData: Partial<SupplierDto>) {
-    const supplier = this.suppliers.find((s) => s.id === id);
+  // PUT /supplier/:id
+  async update(id: string, updateSupplierDto: Partial<SupplierDto>) {
+    const supplier = await this.userRepo.findOne({
+      where: { id, role: 'supplier' },
+    });
     if (!supplier) throw new NotFoundException('Supplier not found');
 
-    Object.assign(supplier, partialData);
-    return { message: 'Supplier partially updated', data: supplier };
+    if (updateSupplierDto.name !== undefined) {
+      supplier.fullName = updateSupplierDto.name;
+    }
+    if (updateSupplierDto.email !== undefined) {
+      supplier.email = updateSupplierDto.email;
+    }
+    if (updateSupplierDto.password !== undefined) {
+      supplier.password = updateSupplierDto.password;
+    }
+    if (updateSupplierDto.address !== undefined) {
+      supplier.address = updateSupplierDto.address;
+    }
+    if (updateSupplierDto.contactNumber !== undefined) {
+      supplier.phone = updateSupplierDto.contactNumber;
+    }
+
+    const saved = await this.userRepo.save(supplier);
+    return { message: 'Supplier updated successfully', data: saved };
   }
 
-  delete(id: number) {
-    const index = this.suppliers.findIndex((s) => s.id === id);
-    if (index === -1) throw new NotFoundException('Supplier not found');
-
-    const [removed] = this.suppliers.splice(index, 1);
-    return { message: 'Supplier deleted successfully', data: removed };
+  // PATCH /supplier/:id
+  async patch(id: string, partialData: Partial<SupplierDto>) {
+    return this.update(id, partialData);
   }
 
-  countAll() {
-    return { message: 'Total suppliers', count: this.suppliers.length };
+  // DELETE /supplier/:id
+  async delete(id: string) {
+    const supplier = await this.userRepo.findOne({
+      where: { id, role: 'supplier' },
+    });
+    if (!supplier) throw new NotFoundException('Supplier not found');
+
+    await this.userRepo.remove(supplier);
+    return { message: 'Supplier deleted successfully', data: { id } };
   }
 
-  // ========== CATEGORY 2 SUPPLIER METHODS ==========
-
-  createCategory2(supplierData: SupplierDto & { profileImage?: string }) {
-    const newSupplier = {
-      id: this.category2IdCounter++,
-      ...supplierData,
-      category: 'category2',
-    };
-    this.suppliers.push(newSupplier);
-    return {
-      message: 'Category2 Supplier created successfully',
-      data: newSupplier,
-    };
+  // GET /supplier/count/all
+  async countAll() {
+    const count = await this.userRepo.count({ where: { role: 'supplier' } });
+    return { message: 'Total suppliers', count };
   }
 
-  findAllCategory2() {
-    const data = this.suppliers.filter((s) => s.category === 'category2');
-    return {
-      message: 'All Category2 suppliers fetched',
-      data,
-      count: data.length,
-    };
+  // ========== SUPPLIER ↔ PRODUCT MANY-TO-MANY ==========
+
+  // PUT /supplier/:supplierId/products
+  async replaceSupplierProducts(supplierId: string, productIds: number[]) {
+    const supplier = await this.userRepo.findOne({
+      where: { id: supplierId, role: 'supplier' },
+      relations: ['suppliedProducts'],
+    });
+    if (!supplier) {
+      throw new NotFoundException('Supplier not found');
+    }
+
+    if (!productIds || productIds.length === 0) {
+      supplier.suppliedProducts = [];
+    } else {
+      const products = await this.productRepo.find({
+        where: { id: In(productIds) },
+      });
+      if (products.length === 0) {
+        throw new NotFoundException('No products found for given IDs');
+      }
+      supplier.suppliedProducts = products;
+    }
+
+    const saved = await this.userRepo.save(supplier);
+    return { message: 'Supplier products updated', data: saved.suppliedProducts };
   }
 
-  findOneCategory2(id: number) {
-    const supplier = this.suppliers.find(
-      (s) => s.id === id && s.category === 'category2',
-    );
-    if (!supplier) throw new NotFoundException('Category2 supplier not found');
-    return { message: 'Category2 supplier found', data: supplier };
-  }
-
-  updateCategory2(id: number, updateData: Partial<SupplierDto>) {
-    const index = this.suppliers.findIndex(
-      (s) => s.id === id && s.category === 'category2',
-    );
-    if (index === -1) throw new NotFoundException('Category2 supplier not found');
-
-    this.suppliers[index] = { ...this.suppliers[index], ...updateData };
-    return {
-      message: 'Category2 supplier updated successfully',
-      data: this.suppliers[index],
-    };
-  }
-
-  patchCategory2(id: number, partialData: Partial<SupplierDto>) {
-    const supplier = this.suppliers.find(
-      (s) => s.id === id && s.category === 'category2',
-    );
-    if (!supplier) throw new NotFoundException('Category2 supplier not found');
-
-    Object.assign(supplier, partialData);
-    return {
-      message: 'Category2 supplier partially updated',
-      data: supplier,
-    };
-  }
-
-  deleteCategory2(id: number) {
-    const index = this.suppliers.findIndex(
-      (s) => s.id === id && s.category === 'category2',
-    );
-    if (index === -1) throw new NotFoundException('Category2 supplier not found');
-
-    const [deleted] = this.suppliers.splice(index, 1);
-    return { message: 'Category2 supplier deleted successfully', data: deleted };
-  }
-
-  countAllCategory2() {
-    const data = this.suppliers.filter((s) => s.category === 'category2');
-    return { message: 'Total Category2 suppliers', count: data.length };
-  }
-
-  findCategory2ByEmail(email: string) {
-    if (!email) return { message: 'No email provided', data: [] };
-    const result = this.suppliers.filter(
-      (s) =>
-        s.category === 'category2' &&
-        s.email?.toLowerCase().includes(email.toLowerCase()),
-    );
-    return {
-      message: 'Category2 suppliers filtered by email',
-      data: result,
-    };
-  }
-
-  findCategory2ByName(name: string) {
-    if (!name) return { message: 'No name provided', data: [] };
-    const result = this.suppliers.filter(
-      (s) =>
-        s.category === 'category2' &&
-        s.name?.toLowerCase().includes(name.toLowerCase()),
-    );
-    return {
-      message: 'Category2 suppliers filtered by name',
-      data: result,
-    };
+  // GET /supplier/:supplierId/products
+  async getSupplierProducts(supplierId: string) {
+    const supplier = await this.userRepo.findOne({
+      where: { id: supplierId, role: 'supplier' },
+      relations: ['suppliedProducts'],
+    });
+    if (!supplier) throw new NotFoundException('Supplier not found');
+    return { message: 'Supplier products fetched', data: supplier.suppliedProducts };
   }
 
   // ========== CATEGORY 4 SUPPLIER METHODS (TypeORM) ==========
@@ -213,7 +177,7 @@ export class SupplierService {
         message: 'Category4 supplier created successfully',
         data: savedSupplier,
       };
-    } catch (error) {
+    } catch {
       throw new BadRequestException('Failed to create Category4 supplier');
     }
   }
@@ -226,41 +190,28 @@ export class SupplierService {
         data: result,
         count: result.length,
       };
-    } catch (error) {
+    } catch {
       throw new BadRequestException('Failed to fetch Category4 suppliers');
     }
   }
 
   async getCategory4ById(id: number) {
-    try {
-      const supplier = await this.category4Repo.findOne({ where: { id } });
-      if (!supplier)
-        throw new NotFoundException('Category4 supplier not found');
-      return {
-        message: 'Category4 supplier found',
-        data: supplier,
-      };
-    } catch (error) {
-      throw error;
-    }
+    const supplier = await this.category4Repo.findOne({ where: { id } });
+    if (!supplier) throw new NotFoundException('Category4 supplier not found');
+    return { message: 'Category4 supplier found', data: supplier };
   }
 
   async updateCountry(id: number, country: string) {
-    try {
-      const supplier = await this.category4Repo.findOne({ where: { id } });
-      if (!supplier)
-        throw new NotFoundException('Category4 supplier not found');
+    const supplier = await this.category4Repo.findOne({ where: { id } });
+    if (!supplier) throw new NotFoundException('Category4 supplier not found');
 
-      supplier.country = country;
-      const updatedSupplier = await this.category4Repo.save(supplier);
+    supplier.country = country;
+    const updatedSupplier = await this.category4Repo.save(supplier);
 
-      return {
-        message: 'Country updated successfully',
-        data: updatedSupplier,
-      };
-    } catch (error) {
-      throw error;
-    }
+    return {
+      message: 'Country updated successfully',
+      data: updatedSupplier,
+    };
   }
 
   async getUsersByJoiningDate(date: string) {
@@ -274,7 +225,7 @@ export class SupplierService {
         message: `Suppliers with joining date ${date}`,
         data: result,
       };
-    } catch (error) {
+    } catch {
       throw new BadRequestException('Invalid date format');
     }
   }
@@ -290,7 +241,7 @@ export class SupplierService {
         data: result,
         count: result.length,
       };
-    } catch (error) {
+    } catch {
       throw new BadRequestException(
         'Failed to fetch suppliers with default country',
       );
@@ -298,16 +249,12 @@ export class SupplierService {
   }
 
   async deleteCategory4(id: number) {
-    try {
-      const result = await this.category4Repo.delete(id);
-      if (result.affected === 0) {
-        throw new NotFoundException('Category4 supplier not found');
-      }
-      return {
-        message: 'Category4 supplier deleted successfully',
-      };
-    } catch (error) {
-      throw error;
+    const result = await this.category4Repo.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException('Category4 supplier not found');
     }
+    return {
+      message: 'Category4 supplier deleted successfully',
+    };
   }
 }

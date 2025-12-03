@@ -19,13 +19,17 @@
     })
     name?: string;
 
-    // ========== EMAIL VALIDATION (.xyz domain required) ==========
-    @IsNotEmpty()
-    @IsEmail({}, { message: 'Invalid email format' })
-    @Matches(/^[\w.+-]+@[\w-]+\.(xyz)$/, {
-      message: 'Email must be a valid address and use .xyz domain',
-    })
-    email: string;
+  // ========== EMAIL VALIDATION (.xyz domain required) ==========
+  @IsNotEmpty()
+  @IsEmail({}, { message: 'Invalid email format' })
+  @Matches(/^[\w.+-]+@[\w-]+\.(xyz)$/, {
+    message: 'Email must be a valid address and use .xyz domain',
+  })
+  email: string;
+  @Matches(/^(?=.*[0-9])/, {
+    message: 'Password must contain at least one number',
+  })
+  password: string;
 
     // ========== ADDRESS VALIDATION ==========
     @IsNotEmpty()
@@ -36,11 +40,13 @@
     @IsString()
     phone: string;
 
-    // ========== NID NUMBER VALIDATION ==========
-    @IsOptional()
-    @IsString()
-    @Matches(/^\d{10,17}$/, {
-      message: 'NID must be numeric and between 10 and 17 digits',
-    })
-    nidNumber?: string;
-  }
+  // ========== NID NUMBER VALIDATION ==========
+  @IsOptional()
+  @IsString()
+  @Matches(/^\d{10,17}$/, {
+    message: 'NID must be numeric and between 10 and 17 digits',
+  })
+  nidNumber?: string;
+  @IsOptional()
+  role?: string;
+}

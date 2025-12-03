@@ -6,9 +6,8 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { ProductEntity } from './product.entity';
+import { ProductEntity } from '../products/product.entity';
 import { UserEntity } from '../auth/user.entity';
-
 @Entity('reviews')
 export class ReviewEntity {
   @PrimaryGeneratedColumn()

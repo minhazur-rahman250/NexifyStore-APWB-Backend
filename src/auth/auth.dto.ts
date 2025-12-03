@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength, Matches , IsOptional, IsEnum } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength, Matches, IsIn } from 'class-validator';
 
 export class RegisterDto {
   @IsString()
@@ -28,10 +28,10 @@ export class RegisterDto {
   @IsNotEmpty()
   address: string;
 
-  @IsOptional()
-  @IsEnum(['admin', 'seller', 'buyer', 'supplier'])
-  role?: 'admin' | 'seller' | 'buyer' | 'supplier';
-
+  @IsString()
+  @IsNotEmpty()
+  @IsIn(['admin', 'buyer', 'seller', 'supplier'])
+  role: string;
 }
 
 export class LoginDto {
@@ -46,6 +46,7 @@ export class LoginDto {
 
 export class JwtPayload {
   email: string;
-  id: number;
+  id: string;   // or number, match your UserEntity.id type
   role: string;
 }
+

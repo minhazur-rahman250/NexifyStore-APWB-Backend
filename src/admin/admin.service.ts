@@ -197,7 +197,7 @@ export class AdminService {
         adminId,
         targetUserId: userId,
         actionType: 'Approve',
-        comments: `Role changed from ${oldRole} to ${newRole}`,
+        comments: 'Role changed from ${oldRole} to ${newRole}',
       });
 
       await this.actionLogRepo.save(log);
@@ -299,7 +299,7 @@ export class AdminService {
       });
 
       return {
-        message: `All logs by admin ${adminId}`,
+        message: 'All logs by admin ${adminId}',
         data: logs,
         count: logs.length,
       };
@@ -318,7 +318,7 @@ export class AdminService {
       });
 
       return {
-        message: `All logs for user ${targetUserId}`,
+        message: 'All logs for user ${targetUserId}',
         data: logs,
         count: logs.length,
       };
@@ -342,7 +342,7 @@ export class AdminService {
       });
 
       return {
-        message: `All logs with action type ${actionType}`,
+        message: 'All logs with action type ${actionType}',
         data: logs,
         count: logs.length,
       };
@@ -381,7 +381,7 @@ export class AdminService {
       });
 
       return {
-        message: `All ${role}s fetched`,
+        message: 'All ${role}s fetched',
         data: users,
         count: users.length,
       };
@@ -403,7 +403,7 @@ export class AdminService {
       });
 
       return {
-        message: `All ${status} users fetched`,
+        message: 'All ${status} users fetched',
         data: users,
         count: users.length,
       };

@@ -9,8 +9,8 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { UserEntity } from '../auth/user.entity';
-import { CategoryEntity } from './category.entity';
-import { ReviewEntity } from './review.entity';
+import { CategoryEntity } from '../category/category.entity';
+import { ReviewEntity } from '../review/review.entity';
 import { OrderItemEntity } from '../orders/order-item.entity';
 import { CartItemEntity } from '../cart/cart-item.entity';
 import { SupplierStockEntity } from '../supplier/supplier-stock.entity';
@@ -30,31 +30,41 @@ export class ProductEntity {
   @Column('int')
   stock: number;
 
-  @ManyToOne(() => CategoryEntity, (cat) => cat.products, { nullable: true })
+  @Column({ type: 'text', nullable: true })
+  description?: string;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  addedDate?: Date;
+
+  @Column({ type: 'varchar', nullable: true })
+  socialLink?: string;
+
+  @ManyToOne(() => CategoryEntity, (cat) => cat.products, { nullable: true }) //supplier
   @JoinColumn({ name: 'category_id' })
   category: CategoryEntity;
 
-  @OneToMany(() => NotificationEntity, (n) => n.product)
+  @OneToMany(() => NotificationEntity, (n) => n.product)//Admin
   notifications: NotificationEntity[];
 
-  // Seller owner
-  @ManyToOne(() => UserEntity, (u) => u.products)
+  
+  @ManyToOne(() => UserEntity, (u) => u.products)//seller
   @JoinColumn({ name: 'seller_id' })
   seller: UserEntity;
 
-  @OneToMany(() => ReviewEntity, (r) => r.product)
+  @OneToMany(() => ReviewEntity, (r) => r.product)//buyer
   reviews: ReviewEntity[];
 
-  @OneToMany(() => OrderItemEntity, (item) => item.product)
+  @OneToMany(() => OrderItemEntity, (item) => item.product)//buyer
   orderItems: OrderItemEntity[];
 
-  @OneToMany(() => CartItemEntity, (item) => item.product)
+  @OneToMany(() => CartItemEntity, (item) => item.product)//buyer
   cartItems: CartItemEntity[];
 
-  @OneToMany(() => SupplierStockEntity, (stock) => stock.product)
+  @OneToMany(() => SupplierStockEntity, (stock) => stock.product)//supplier
   supplierStocks: SupplierStockEntity[];
 
-  @ManyToMany(() => UserEntity, (u) => u.suppliedProducts)
+  @ManyToMany(() => UserEntity, (u) => u.suppliedProducts)//supplier
   suppliers: UserEntity[];
+  Category4Suppliers: any;
    //notifications: any;
 }

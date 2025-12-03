@@ -25,7 +25,7 @@ export class SellerController {
   @Post()
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   create(@Body() dto: ProductDto) {
-    return this.sellerService.create(dto);
+    return this.sellerService.create(dto, dto.sellerId);
   }
 
   // GET /seller - Get All Products
@@ -84,7 +84,7 @@ export class SellerController {
   @Post('user')
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
   createUser(@Body(new UserValidationPipe()) dto: CreateUserDto) {
-    return this.sellerService.createUser(dto);
+    return this.sellerService.createUser(null, dto);
   }
 
   // PATCH /seller/user/:id/status - Update User Status

@@ -33,6 +33,6 @@ async function bootstrap() {
   });
 
   await app.listen(7000);
-  console.log('NexifyStore - Buyer Service running on http://localhost:7000');
+  console.log('NexifyStore All Service running on http://localhost:7000');
 }
 bootstrap();

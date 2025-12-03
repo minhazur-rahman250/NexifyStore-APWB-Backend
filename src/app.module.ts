@@ -7,8 +7,8 @@ import { AuthModule } from './auth/auth.module';
 import { AdminModule } from './admin/admin.module';
 import { OrderModule } from './orders/order.module';
 import { TransactionModule } from './transactions/transaction.module';
-import { CategoryModule } from './products/category.module';
-import { ReviewModule } from './products/review.module';
+import { CategoryModule } from './category/category.module';
+import { ReviewModule } from './review/review.module';
 import { CartModule } from './cart/cart.module';
 import { NotificationModule } from './notifications/notification.module';
 
