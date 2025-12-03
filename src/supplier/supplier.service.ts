@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SupplierDto } from './supplier.dto';
 import { Category4Supplier } from './supplier.entity';
+import { UserEntity } from 'src/auth/user.entity';
 
 @Injectable()
 export class SupplierService {
@@ -51,6 +52,13 @@ export class SupplierService {
     this.suppliers.push(newSupplier);
     return { message: 'Supplier created successfully', data: newSupplier };
   }
+
+  async createCategory4FromUser(user: UserEntity) {
+  const supplier = this.category4Repo.create({
+    country: 'Unknown',
+  });
+  return this.category4Repo.save(supplier);
+}
 
   findAll() {
     return { message: 'All suppliers fetched', data: this.suppliers };

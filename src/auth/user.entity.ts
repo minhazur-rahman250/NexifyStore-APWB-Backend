@@ -1,10 +1,10 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, BeforeInsert, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Category4Supplier } from '../supplier/supplier.entity';
+// import { Category4Supplier } from '../supplier/supplier.entity';
 import { ProductEntity } from 'src/products/product.entity';
 import { TransactionEntity } from 'src/transactions/transaction.entity';
 import { AdminActionLogEntity } from 'src/admin/admin-action-log.entity';
-import { ReviewEntity } from 'src/products/review.entity';
+import { ReviewEntity } from 'src/review/review.entity';
 import { CartEntity } from 'src/cart/cart.entity';
 import { OrderEntity } from 'src/orders/order.entity';
 import { SupplierStockEntity } from 'src/supplier/supplier-stock.entity';
@@ -67,8 +67,8 @@ export class UserEntity {
     return await bcrypt.compare(plainPassword, this.password);
   }
 
-  @OneToMany(() => Category4Supplier, (supplier: Category4Supplier) => supplier.approvedBy)
-  approvedSuppliers: Category4Supplier[];
+  // @OneToMany(() => Category4Supplier, (supplier: Category4Supplier) => supplier.approvedBy)
+  // approvedSuppliers: Category4Supplier[];
   
   // ========== Buyer side relations ==========
 

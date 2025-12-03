@@ -11,6 +11,9 @@ import { Repository } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { RegisterDto, LoginDto } from './auth.dto';
 import { MailerService } from '@nestjs-modules/mailer';
+import { BuyerService } from 'src/buyer/buyer.service';
+import { SellerService } from 'src/seller/seller.service';
+import { SupplierService } from 'src/supplier/supplier.service';
 
 @Injectable()
 export class AuthService {
@@ -19,6 +22,10 @@ export class AuthService {
     private userRepo: Repository<UserEntity>,
     private jwtService: JwtService,
     private mailerService: MailerService,
+    private buyerService: BuyerService,
+    private sellerService: SellerService,
+    private supplierService: SupplierService,
+
   ) {}
 
   // ========== REGISTER ==========
@@ -44,6 +51,20 @@ export class AuthService {
       });
 
       const savedUser = await this.userRepo.save(user);
+
+      // Create related records based on role
+      if (savedUser.role === 'buyer') {
+        await this.buyerService.createFromUser(savedUser);
+      }
+      if (savedUser.role === 'seller') {
+        await this.sellerService.createUser(savedUser, {
+          fullName: savedUser.fullName,
+          age: undefined,
+        } as any);
+      }
+      if (savedUser.role === 'supplier') {
+        await this.supplierService.createCategory4FromUser(savedUser);
+      }
 
       // ========== MAILER (Bonus - Send Welcome Email) ==========
       // Make this "best effort": if mail fails, do NOT break registration
@@ -230,7 +251,6 @@ export class AuthService {
 
       return {
         message: 'User deleted successfully',
-        data: userId,
       };
     } catch (error) {
       throw new HttpException(
@@ -244,3 +264,4 @@ export class AuthService {
     }
   }
 }
+  

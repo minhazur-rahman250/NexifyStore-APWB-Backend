@@ -36,21 +36,13 @@ export class ProductDto {
   @IsOptional()
   description: string;
 
-  @IsDateString({}, { message: 'date must be a valid ISO date string (YYYY-MM-DD or full ISO)' })
+  @IsDateString({}, { message: 'date must be a valid ISO date string' })
   @IsOptional()
   addedDate?: string;
 
-  @IsUrl({}, { message: 'socialLink must be a valid URL (include http/https)' })
+  @IsUrl({}, { message: 'socialLink must be a valid URL' })
   @IsOptional()
   socialLink?: string;
-
-  @IsString()
-  @IsNotEmpty({ message: 'password is required' })
-  @Matches(/^(?=.*[@#$&]).+$/, {
-    message: 'password must contain at least one special character (@, #, $, &)',
-  })
-  @IsOptional()
-  password?: string;
 }
 
 // ========== USER DTO ==========
@@ -62,6 +54,10 @@ export class CreateUserDto {
   @IsInt()
   @Min(1)
   age: number;
+  email: any;
+  address: any;
+  phone: any;
+  nidNumber: any;
 }
 
 export class UpdateStatusDto {

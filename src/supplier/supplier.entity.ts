@@ -19,9 +19,12 @@ export class Category4Supplier {
   @Column({ type: 'varchar', length: 30, default: 'Unknown' })
   country: string;
 
-  @ManyToOne(() => UserEntity, user => user.approvedSuppliers)
-  @JoinColumn({ name: 'approvedBy' })
-  approvedBy: UserEntity;
+  @Column({ type: 'varchar', default: 'supplier' })
+role: string;
+
+  // @ManyToOne(() => UserEntity)
+  // @JoinColumn({ name: 'approvedBy' })
+  // approvedBy: UserEntity;
 
    // UserEntity (supplier) এর সাথে 1:1
   // @OneToOne(() => UserEntity)

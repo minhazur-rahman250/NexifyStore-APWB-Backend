@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
 import { BuyerEntity } from './buyer.entity';
 import { BuyerDto } from './buyer.dto';
+import { UserEntity } from 'src/auth/user.entity';
 
 @Injectable()
 export class BuyerService {
@@ -33,6 +34,7 @@ export class BuyerService {
         phone: dto.phone,
         nidNumber: dto.nidNumber,
         isActive: true,
+        role: 'buyer',
       });
 
       return await this.buyerRepository.save(buyer);
@@ -43,6 +45,18 @@ export class BuyerService {
       throw new BadRequestException('Failed to create buyer');
     }
   }
+
+  async createFromUser(user: UserEntity) {
+  const buyer = this.buyerRepository.create({
+    name: user.fullName,
+    email: user.email,
+    address: user.address,
+    phone: user.phone,
+    nidNumber: '', // চাইলে পরে update করবে
+    isActive: true,
+  });
+  return this.buyerRepository.save(buyer);
+}
 
   // ========== GET ALL BUYERS ==========
   async findAll(): Promise<BuyerEntity[]> {

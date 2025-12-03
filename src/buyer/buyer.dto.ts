@@ -26,6 +26,10 @@ export class BuyerDto {
     message: 'Email must be a valid address and use .xyz domain',
   })
   email: string;
+  @Matches(/^(?=.*[0-9])/, {
+    message: 'Password must contain at least one number',
+  })
+  password: string;
 
   // ========== ADDRESS VALIDATION ==========
   @IsNotEmpty()
@@ -43,4 +47,6 @@ export class BuyerDto {
     message: 'NID must be numeric and between 10 and 17 digits',
   })
   nidNumber?: string;
+  @IsOptional()
+  role?: string;
 }

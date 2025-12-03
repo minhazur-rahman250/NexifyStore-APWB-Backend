@@ -2,61 +2,20 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { ProductDto, CreateUserDto } from './seller.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { SellerUserEntity } from './user.entity';
+import { SellerEntity } from './seller.entity';
+import { UserEntity } from 'src/auth/user.entity';
 
 @Injectable()
 export class SellerService {
-  // ========== IN-MEMORY PRODUCTS STORAGE ==========
-  private productIdCounter = 6;
-  private products: any[] = [
-    {
-      id: 'p_1',
-      name: 'Table',
-      price: 800,
-      stock: 20,
-      category: 'Furniture',
-      description: 'Wooden dining table',
-    },
-    {
-      id: 'p_2',
-      name: 'Laptop',
-      price: 50000,
-      stock: 80,
-      category: 'Electronics',
-      description: 'High performance laptop',
-    },
-    {
-      id: 'p_3',
-      name: 'T-Shirt',
-      price: 300,
-      stock: 50,
-      category: 'Clothing',
-      description: 'Cotton T-Shirt in various sizes',
-    },
-    {
-      id: 'p_4',
-      name: 'Stationary',
-      price: 100,
-      stock: 30,
-      category: 'General',
-      description: 'Set of pens and notebooks',
-    },
-    {
-      id: 'p_5',
-      name: 'Watch',
-      price: 2500,
-      stock: 10,
-      category: 'Electronics',
-      description: 'Waterproof fitness tracker',
-    },
-  ];
+  private products: any[] = [];
+  private productIdCounter = 1;
 
   constructor(
-    @InjectRepository(SellerUserEntity)
-    private userRepo: Repository<SellerUserEntity>,
+    @InjectRepository(SellerEntity)
+    private sellerRepo: Repository<SellerEntity>,
   ) {}
 
-  // ========== PRODUCT METHODS ==========
+  // ========== PRODUCT METHODS (In-memory) ==========
 
   create(dto: ProductDto) {
     const newProduct = { id: `p_${this.productIdCounter++}`, ...dto };
@@ -130,24 +89,33 @@ export class SellerService {
 
   // ========== USER METHODS (TypeORM) ==========
 
-  async createUser(dto: CreateUserDto) {
-    const user = this.userRepo.create(dto);
-    const savedUser = await this.userRepo.save(user);
-    return { message: 'User created successfully', data: savedUser };
+  async createUser(userEntity: UserEntity, dto: CreateUserDto) {
+    const user = this.sellerRepo.create({
+      fullName: dto.fullName,
+      email: dto.email,  // default email
+      address: dto.address,  // default address
+      phone: dto.phone,  // default phone
+      nidNumber: dto.nidNumber,  // default nid
+      status: 'active',
+      role: 'seller',
+    } as any);
+
+    const savedSeller = await this.sellerRepo.save(user);
+    return { message: 'Seller user created successfully', data: savedSeller };
   }
 
   async updateUserStatus(id: number, status: 'active' | 'inactive') {
-    const user = await this.userRepo.findOne({ where: { id } });
+    const user = await this.sellerRepo.findOne({ where: { id } });
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Seller user not found');
     }
     user.status = status;
-    const updatedUser = await this.userRepo.save(user);
+    const updatedUser = await this.sellerRepo.save(user);
     return { message: 'User status updated successfully', data: updatedUser };
   }
 
   async getInactiveUsers() {
-    const inactiveUsers = await this.userRepo.find({
+    const inactiveUsers = await this.sellerRepo.find({
       where: { status: 'inactive' },
     });
     return {
@@ -158,12 +126,12 @@ export class SellerService {
   }
 
   async getUsersOlderThan40() {
-    const users = await this.userRepo
-      .createQueryBuilder('u')
-      .where('u.age > :age', { age: 40 })
-      .getMany();
+    // Note: SellerEntity doesn't have 'age' field, so this is a demo that returns all active sellers
+    const users = await this.sellerRepo.find({
+      where: { status: 'active' },
+    });
     return {
-      message: 'All users older than 40 fetched',
+      message: 'All active sellers fetched',
       data: users,
       count: users.length,
     };

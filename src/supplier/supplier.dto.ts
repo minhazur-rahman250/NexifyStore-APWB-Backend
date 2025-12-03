@@ -51,6 +51,8 @@ export class SupplierDto {
 
   profileImage?: string;
   category?: string;
+  @IsOptional()
+  role?: string;
 }
 
 // ========== CATEGORY 2 DTO (AIUB Email, Strict Validation) ==========
