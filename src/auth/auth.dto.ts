@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength, Matches } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength, Matches , IsOptional, IsEnum } from 'class-validator';
 
 export class RegisterDto {
   @IsString()
@@ -27,6 +27,11 @@ export class RegisterDto {
   @IsString()
   @IsNotEmpty()
   address: string;
+
+  @IsOptional()
+  @IsEnum(['admin', 'seller', 'buyer', 'supplier'])
+  role?: 'admin' | 'seller' | 'buyer' | 'supplier';
+
 }
 
 export class LoginDto {
